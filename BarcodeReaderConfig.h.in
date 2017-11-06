@@ -1,0 +1,3 @@
+// the configured options and settings for Tutorial
+#define BarcodeReader_VERSION_MAJOR @BarcodeReader_VERSION_MAJOR@
+#define BarcodeReader_VERSION_MINOR @BarcodeReader_VERSION_MINOR@

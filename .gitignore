@@ -1,0 +1,4 @@
+/build
+/.vscode
+/platforms/win/*.dll
+/platforms/win/*.lib

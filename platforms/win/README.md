@@ -1,0 +1,1 @@
+Get [Dynamsoft Barcode Reader SDK for Windows](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx).
