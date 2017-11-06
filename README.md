@@ -33,7 +33,7 @@
 
 ### Screenshot
 
-![build barcode reader with cmake](images/screenshot.png)
+![build barcode reader with cmake](images/screenshot.PNG)
 
 
 
