@@ -145,7 +145,11 @@ typedef struct tagSBarcodeResult
 	int iX4;
 	int iY4;
 	int iPageNum;
+#if defined(_WIN32) || defined(_WIN64)
 	wchar_t* pBarcodeText;
+#else
+	char* pBarcodeText;
+#endif
 	int iAngle;
 	int iModuleSize;
 	BOOL bIsUnrecognized;
