@@ -15,11 +15,16 @@
     ```
 3. Edit **CMakeLists.txt** to replace the installation path with yours:
     ```
-    set(CMAKE_INSTALL_PREFIX "f:/barcodereader")
+    set(CMAKE_INSTALL_PREFIX "e:/${PROJECT_NAME}")
     ```
-4. Generate project configuration files:
-    ```
+4. Generate project configuration files for win32:
+    ```bash
     cmake ..
+    ```
+
+    For win64:
+    ```bash
+    cmake -G"Visual Studio 14 2015 Win64" ..
     ```
 5. Build and install the project:
     ```
@@ -27,7 +32,7 @@
     ```
 6. Run the app:
     ```
-    cd f:\barcodereader\bin
+    cd e:\BarcodeReader\bin
     BarcodeReader.exe [barcode image file]
     ```
 
@@ -35,9 +40,48 @@
 
 ![build barcode reader with cmake](images/screenshot.PNG)
 
+## Linux 
+1. Install **CMake**:
+    ```bash
+    sudo apt-get install cmake
+    ```
+2. Download [Dynamsoft Barcode Reader 5.2 for Linux](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-for-Linux-Download.aspx). Copy **libDynamsoftBarcodeReader.so** to **platforms\linux**.
+3. Create a **build** folder:
+    ```
+    mkdir build
+    cd build
+    ```
+4. Build and install the project:
+    ```bash
+    sudo cmake --build . --target install
+    ```
+5. Run the app:
+    ```
+    BarcodeReader [barcode image file]
+    ```
 
+## macOS
+1. Install **CMake**:
+    ```bash
+    brew install cmake
+    ```
+2. Download [Dynamsoft Barcode Reader 5.2 for macOS](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx?edition=macos&version=5.2). Copy **libDynamsoftBarcodeReader.dylib** to **platforms\macos**.
+3. Create a **build** folder:
+    ```
+    mkdir build
+    cd build
+    ```
+4. Build and install the project:
+    ```bash
+    cmake --build . --target install
+    ```
+5. Run the app:
+    ```
+    BarcodeReader [barcode image file]
+    ```
 
 ## Reference
 * https://cmake.org/cmake-tutorial/
 * https://cmake.org/Wiki/CMake_Useful_Variables
 * https://stackoverflow.com/questions/10671916/how-to-copy-dll-files-into-the-same-folder-as-the-executable-using-cmake
+* https://cmake.org/Wiki/CMake_RPATH_handling
