@@ -85,3 +85,7 @@
 * https://cmake.org/Wiki/CMake_Useful_Variables
 * https://stackoverflow.com/questions/10671916/how-to-copy-dll-files-into-the-same-folder-as-the-executable-using-cmake
 * https://cmake.org/Wiki/CMake_RPATH_handling
+
+## Blog
+* [CMake: Build C++ Project for Windows, Linux and macOS](http://www.codepool.biz/cmake-cc-windows-linux-macos.html)
+* [My First C/C++ App Built with CMake on Windows](http://www.codepool.biz/cc-barcode-app-cmake-windows.html)
