@@ -1,0 +1,21 @@
+{
+    "Version": "1.0",
+    "ImageParameters": {
+        "Name": "CUSTOM",
+        "Timeout": 2147483647,
+        "MaxImageDimension": 4000000,
+        "PDFRasterDPI": 300,
+        "ImageType": "AutoDetection",
+        "TextFilterMode": "Enable",
+        "MinImageDimensionToFilterText": 1000000,
+        "RegionPredetectionMode": "Enable",
+        "MinImageDimensionToPredetectRegion": 1000000,
+        "LocalizationMode": "Lines",
+        "BarcodeFormatIds": "ALL",
+        "MaxBarcodesCount": 2147483647,
+        "MaxThreadCount": 4,
+        "DeblurLevel": 9,
+        "Pages": "",
+        "BarcodeInvertMode": "DarkOnLight"
+    }
+}

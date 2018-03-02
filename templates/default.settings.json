@@ -1,0 +1,10 @@
+{
+    "Version": "1.0",
+    "GlobalParameters": {
+        "Name": "GLOBAL_DEFAULT",
+        "MaxThreadCount": 4
+    },
+    "ParameterTemplateArray": [
+        "custom.json"
+    ]
+}

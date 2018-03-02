@@ -3,7 +3,7 @@ project (BarcodeReader)
 MESSAGE( STATUS "PROJECT_NAME: " ${PROJECT_NAME} )
 
 # The version number.
-set(BarcodeReader_VERSION_MAJOR 1)
+set(BarcodeReader_VERSION_MAJOR 6)
 set(BarcodeReader_VERSION_MINOR 0)
 
 # Check platforms
@@ -65,6 +65,11 @@ if(WINDOWS)
         "${PROJECT_SOURCE_DIR}/platforms/win/DynamsoftBarcodeReaderx86.dll"              
         $<TARGET_FILE_DIR:BarcodeReader>)
     endif()
+
+    add_custom_command(TARGET BarcodeReader POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/templates"       
+        $<TARGET_FILE_DIR:BarcodeReader>/"templates" )
 endif()
 
 # Set installation directory
