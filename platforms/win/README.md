@@ -1,1 +1,1 @@
-Get [Dynamsoft Barcode Reader SDK 5.2 for Windows](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx).
+Contact support@dynamsoft.com to get **Dynamsoft Barcode Reader SDK v6.0 Preview for Windows**.

@@ -1,1 +1,0 @@
-Get [Dynamsoft Barcode Reader SDK 5.2 for Linux](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-for-Linux-Download.aspx).
