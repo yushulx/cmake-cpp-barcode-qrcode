@@ -577,7 +577,6 @@ public:
 	// @return The version info string.
 	static const char* GetVersion();
 
-	void TestSetBarcodeFormatAndCount(int iFormat, int iCount);
 	int SaveSettings(char szContent[], int nContentLength);
 	int SaveParameterTemplate(const char* pszTemplateName, char szContent[], int nContentLength);
 	static int CheckParameterTemplate(const char* pszTemplateContent, char szErrorMsgBuffer[], int nErrorMsgBufferLen);
