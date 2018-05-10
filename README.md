@@ -1,5 +1,8 @@
 # Building C/C++ Barcode Reader with CMake
 
+## License
+Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx).
+
 ## Windows
 ### Installation
 * [Visual Studio Community 2017](https://www.visualstudio.com/downloads/)
