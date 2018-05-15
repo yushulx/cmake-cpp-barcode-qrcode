@@ -12,6 +12,7 @@
 #define DBR_API __attribute__((visibility("default")))
 typedef signed char BOOL;
 typedef void* HANDLE;
+#include <cstddef>
 #else
 #ifdef DBR_EXPORTS
 #define DBR_API __declspec(dllexport)
@@ -308,6 +309,68 @@ typedef struct tagSTextResultArray
 	PSTextResult *ppResults;
 } STextResultArray;
 
+
+typedef enum 
+{
+    EIT_Document,
+    EIT_Photo,
+    EIT_AutoDetection,
+	//EIT_Unknown
+}ImageType;
+
+typedef enum 
+{
+	//RPM_Auto,
+    RPM_Disable = 1,
+    RPM_Enable = 2,
+	//RPM_Unknown
+}RegionPredetectionMode;
+
+typedef enum 
+{
+	//TFM_Auto,
+    TFM_Disable = 1,
+    TFM_Enable = 2,
+	//TFM_Unknown
+}TextFilterMode;
+
+
+typedef enum 
+{
+    BIM_DarkOnLight,
+    BIM_LightOnDark,
+	//BCM_Unknown
+}BarcodeInvertMode;
+
+typedef enum 
+{
+	CICM_Auto = 0,
+	CICM_Grayscale = 1
+}ColourImageConvertMode;
+
+typedef struct tagPublicParameterSettings
+{
+    char mName[32];
+    int mTimeout;
+    int mPDFRasterDPI;
+    TextFilterMode mTextFilterMode;
+    RegionPredetectionMode mRegionPredetectionMode;
+    char mLocalizationAlgorithmPriority[64];
+    char mBarcodeFormatIds[128];
+    int mMaxAlgorithmThreadCount;
+    int mTextureDetectionSensitivity;
+    int mDeblurLevel;
+    int mAntiDamageLevel;
+    int mMaxImageDimensionToLocalizeBarcodesOnFullImage;
+    int mMaxBarcodeCount;
+    BarcodeInvertMode mBarcodeInvertMode;
+    int mScaleDownThreshold;
+    int mGrayEqualizationSensitivity;
+    int mEnableFillBinaryVacany;
+    ColourImageConvertMode mColourConvertionMode;
+	char mReserved[256];
+}PublicParameterSettings;
+
 #pragma pack(pop)
 
 //---------------------------------------------------------------------------
@@ -449,6 +512,10 @@ extern "C" {
 	DBR_API int DBR_SaveParameterTemplate(void* hBarcode, const char* pszTemplateName, char szContent[], int nContentLength);
 	DBR_API int DBR_CheckParameterTemplate(const char* pszTemplateContent, char szErrorMsgBuffer[], int nErrorMsgBufferLen);
 
+	DBR_API int DBR_GetTemplateSettings(void* hBarcode,const char*pszTemplateName, PublicParameterSettings *pSettings);
+
+	DBR_API int DBR_SetTemplateSettings(void* hBarcode,const char*pszTemplateName,PublicParameterSettings *pSettings,char szErrorMsgBuffer[],int nErrorMsgBufferLen);
+
 #ifdef __cplusplus
 }
 #endif
@@ -503,6 +570,14 @@ public:
 	// @param [in] nErrorMsgBufferLen The length of the allocated buffer.
 	// @return Returns the error code. It will return 0 if the function completes successfully.
 	int  AppendParameterTemplate(const char* pszFileContent, char szErrorMsgBuffer[] = NULL, int nErrorMsgBufferLen = 0);
+
+	// Unload the parameter template in a specified name. 
+	// @param [in] pszTemplateName The name of the template.
+	// @param [in/out] szErrorMsgBuffer The buffer is allocated by caller and the recommended length is 256. The error message will be copied to the buffer. 
+	// @param [in] nErrorMsgBufferLen The length of the allocated buffer.
+	// @return Returns the error code. It will return 0 if the function completes successfully.
+	int  UnloadParameterTemplate(const char* pszTemplateName, char szErrorMsgBuffer[] = NULL, int nErrorMsgBufferLen = 0);
+
 
 	// Gets the count of the parameter templates. 
 	// @return Returns the count of parameter template.
@@ -580,6 +655,8 @@ public:
 	int SaveSettings(char szContent[], int nContentLength);
 	int SaveParameterTemplate(const char* pszTemplateName, char szContent[], int nContentLength);
 	static int CheckParameterTemplate(const char* pszTemplateContent, char szErrorMsgBuffer[], int nErrorMsgBufferLen);
+	int GetTemplateSettings(const char* pszTemplateName,PublicParameterSettings *psettings);
+	int SetTemplateSettings(const char* pszTemplateName,PublicParameterSettings *psettings,char szErrorMsgBuffer[],int nErrorMsgBufferLen);
 
 private:
 	CBarcodeReader(const CBarcodeReader& r);

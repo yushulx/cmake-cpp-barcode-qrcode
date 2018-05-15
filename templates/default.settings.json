@@ -5,6 +5,6 @@
         "MaxThreadCount": 4
     },
     "ParameterTemplateArray": [
-        "custom.json"
+        "tpl_custom.json"
     ]
 }

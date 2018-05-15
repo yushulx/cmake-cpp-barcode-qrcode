@@ -39,7 +39,7 @@ int main(int argc, const char* argv[])
 	// Set license
 	CBarcodeReader reader;
 	#if defined(WINDOWS)
-	const char* pszLicense = "t0068MgAAAGflIP7rKPr7Vm9Sgk6iIUTiiSOPwQL8vJzUzxYYh7lXC5VcGv9oo0DPULMK6V9MT7qqhGNYGsGJvgtpRTUBXc8=";
+	const char* pszLicense = "t0068MgAAAGhyhnDz09eHhPRZ5MRe3ak0VO/TZmolcIp39SoQ8LtsgZhzAj5khTx+OFsXgz+HIz+MNaC7VA69MM1N26gNlZA=";
 	#elif defined(LINUX)
 	const char* pszLicense = "t0068MgAAAH/7UYLqUWdzq7Wdmqm1jmbYWWzWq9PkQs0HktHgYFVw1SrAPy724d6eENC3ZMYRtDB53yq5TGl8uEXCNDwV4dg=";
 	#elif defined(MACOS)
