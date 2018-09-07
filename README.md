@@ -1,7 +1,12 @@
 # Building C/C++ Barcode Reader with CMake
 
+Version 6.3
+
 ## License
 Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx).
+
+## Contact Us
+https://www.dynamsoft.com/Company/Contact.aspx
 
 ## Windows
 ### Installation
