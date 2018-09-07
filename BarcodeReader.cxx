@@ -44,7 +44,7 @@ int main(int argc, const char* argv[])
 	#elif defined(LINUX)
 	const char* pszLicense = "t0068NQAAAIY/7KegDlZn7YiPdAj0cbA11n2CwuCEWnk2KYla55ozdfmoasjRIpHhl0EUZmko/zxfxFLH3FpLw694uihoCVM=";
 	#elif defined(MACOS)
-	const char* pszLicense = "t0068MgAAAIEpvKEnV9lYMDE/a86TqCU0y//dEIBdgDvyW3G2hl57K6lvDLGPHFajVA/6IECxNJKGM2n6gTv67ZwgNg65vwo=";
+	const char* pszLicense = "t0068MgAAABIfuTSb0kBwnqpnVTBYgMZS0wAsmsmdeRPs5QylfKPQmoYYBhiNPClf1h7eTq/pnG1IVe11YB64srwtNzxTGLQ=";
 	#endif
 	reader.InitLicense (pszLicense);
 
