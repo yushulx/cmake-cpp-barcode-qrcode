@@ -1,16 +1,21 @@
 # Building C/C++ Barcode Reader with CMake
 
+Version 6.3
+
 ## License
 Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx).
 
+## Contact Us
+https://www.dynamsoft.com/Company/Contact.aspx
+
 ## Windows
 ### Installation
-* [Visual Studio Community 2017](https://www.visualstudio.com/downloads/)
+* [Visual Studio Community](https://www.visualstudio.com/downloads/)
 * [cmake-3.9.5-win64-x64.msi](https://cmake.org/files/v3.9/cmake-3.9.5-win64-x64.msi)
-* [Dynamsoft Barcode Reader 5.2 for Windows](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx)
+* [Dynamsoft Barcode Reader](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx).
 
 ### Steps
-1. Copy **Barcode Reader 5.2\Components\C_C++\Lib\DBRx86.lib** and **Barcode Reader 5.2\Components\C_C++\Redist\DynamsoftBarcodeReaderx86.dll** to **platforms\win** folder.
+1. Copy **DBRx86.lib/DBRx64.lib** and **DynamsoftBarcodeReaderx86.dll/DynamsoftBarcodeReaderx64.dll** to **platforms\win** folder.
 2. Create a **build** folder:
     ```
     mkdir build
@@ -48,7 +53,7 @@ Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallic
     ```bash
     sudo apt-get install cmake
     ```
-2. Download [Dynamsoft Barcode Reader 5.2 for Linux](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-for-Linux-Download.aspx). Copy **libDynamsoftBarcodeReader.so** to **platforms\linux**.
+2. Download [Dynamsoft Barcode Reader for Linux](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-for-Linux-Download.aspx). Copy **libDynamsoftBarcodeReader.so** to **platforms\linux**.
 3. Create a **build** folder:
     ```
     mkdir build
@@ -68,7 +73,7 @@ Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallic
     ```bash
     brew install cmake
     ```
-2. Download [Dynamsoft Barcode Reader 5.2 for macOS](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx?edition=macos&version=5.2). Copy **libDynamsoftBarcodeReader.dylib** to **platforms\macos**.
+2. Download [Dynamsoft Barcode Reader for macOS](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx?edition=macos&version=5.2). Copy **libDynamsoftBarcodeReader.dylib** to **platforms\macos**.
 3. Create a **build** folder:
     ```
     mkdir build
