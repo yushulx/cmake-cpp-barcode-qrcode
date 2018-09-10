@@ -1,0 +1,73 @@
+{
+	"title": "JSON schema for DBR configuration files",
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"description": "A representation of Dynamsoft Barcode Reader template.",
+	"type": "object",
+	"required": ["Version", "ImageParameters"],
+	"properties": {
+		"Version": {
+			"description": "The template version number.",
+			"type": "string",
+			"enum": [
+				"1.0"
+			]
+		},
+		"ImageParameters": {
+			"description": "Parameters for barcode detection",
+			"type": "object",
+			"required": [
+				"Name"
+			],
+			"properties": {
+				"Name": {
+					"description": "The name of the ImageParameters object",
+					"type": "string",
+					"maxLength": 50,
+					"minLength": 1
+				},
+				"Description": {
+					"description": "The description of the ImageParameters object",
+					"type": "string"
+				},
+				"BarcodeFormatIds": {
+					"description": "Sets which types of barcode to be read. Barcode types can be combined",
+					"type": "array",
+					"items": {
+						"type": "string",
+						"enum": [
+							"All", "OneD", "CODE_39", "CODE_128", "CODE_93", "CODABAR", "ITF", "EAN_13", "EAN_8", "UPC_A", "UPC_E", "INDUSTRIAL_25", "PDF417", "QR_CODE", "DATAMATRIX"
+						]
+					}
+				},
+				"MaxBarcodesCount": {
+					"description": "Sets the maximum number of barcodes to read",
+					"type": "number",
+					"maximum": 2147483647,
+					"minimum": 1,
+					"default": 2147483647
+				},
+				"Timeout": {
+					"description": "Sets the maximum amount of time (in milliseconds) it should spend searching for a barcode per page",
+					"type": "number",
+					"maximum": 2147483647,
+					"minimum": 0,
+					"default": 2147483647
+				},
+				"ScaleDownThreshold": {
+					"description": "Sets the threshold value of the image shrinking",
+					"type": "number",
+					"maximum": 2147483647,
+					"minimum": 512,
+					"default": 2048
+				},
+				"DeblurLevel": {
+					"description": "The blurriness of the barcode",
+					"type": "number",
+					"maximum": 9,
+					"minimum": 0,
+					"default": 5
+				}
+			}
+		}
+	}
+}
