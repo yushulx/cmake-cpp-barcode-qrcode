@@ -6,6 +6,57 @@
 #include <sys/time.h>
 #endif
 
+const int GetBarcodeFormatId(int iIndex)
+{
+	switch(iIndex)
+	{
+	case 1:
+		return BF_ALL;
+	case 2:
+		return BF_ONED;
+	case 3:
+		return BF_QR_CODE;
+	case 4:
+		return BF_CODE_39;
+	case 5:
+		return BF_CODE_128;
+	case 6:
+		return BF_CODE_93;
+	case 7:
+		return BF_CODABAR;
+	case 8:
+		return BF_ITF;
+	case 9:
+		return BF_INDUSTRIAL_25;
+	case 10:
+		return BF_EAN_13;
+	case 11:
+		return BF_EAN_8;
+	case 12:
+		return BF_UPC_A;
+	case 13:
+		return BF_UPC_E;
+	case 14:
+		return BF_PDF417;
+	case 15:
+		return BF_DATAMATRIX;
+	case 16:
+		return BF_AZTEC;
+	case 17:
+		return BF_CODE_39_EXTENDED;
+	case 18:
+		return BF_MAXICODE;
+	case 19:
+		return BF_GS1_DATABAR;
+	case 20:
+		return BF_PATCHCODE;
+	case 21:
+		return BF_GS1_COMPOSITE;
+	default:
+		return -1;
+	}
+}
+
 void ToHexString(unsigned char* pSrc, int iLen, char* pDest)
 {
 	const char HEXCHARS[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -15,11 +66,7 @@ void ToHexString(unsigned char* pSrc, int iLen, char* pDest)
 
 	for(i = 0; i < iLen; ++i)
 	{
-		#if defined(WINDOWS)
-		sprintf_s(ptr, 4, "%c%c ", HEXCHARS[ ( pSrc[i] & 0xF0 ) >> 4 ], HEXCHARS[ ( pSrc[i] & 0x0F ) >> 0 ]);
-		#else
 		snprintf(ptr, 4, "%c%c ", HEXCHARS[ ( pSrc[i] & 0xF0 ) >> 4 ], HEXCHARS[ ( pSrc[i] & 0x0F ) >> 0 ]);
-		#endif
 		ptr += 3;
 	}
 }
@@ -39,13 +86,7 @@ int main(int argc, const char* argv[])
 
 	// Set license
 	CBarcodeReader reader;
-	#if defined(WINDOWS)
-	const char* pszLicense = "t0068NQAAAGWe/zXkYmggvyFrd8PmfjplKakH67Upt9HvuRDIBAV6MZ4uODuL1ZUgSEAOygejsfwj6XRKI5iD1tLKZBRGo2c=";
-	#elif defined(LINUX)
-	const char* pszLicense = "t0068NQAAAIY/7KegDlZn7YiPdAj0cbA11n2CwuCEWnk2KYla55ozdfmoasjRIpHhl0EUZmko/zxfxFLH3FpLw694uihoCVM=";
-	#elif defined(MACOS)
-	const char* pszLicense = "t0068MgAAABIfuTSb0kBwnqpnVTBYgMZS0wAsmsmdeRPs5QylfKPQmoYYBhiNPClf1h7eTq/pnG1IVe11YB64srwtNzxTGLQ=";
-	#endif
+	const char* pszLicense = "LICENSE-KEY";
 	reader.InitLicense (pszLicense);
 
 	// Read barcode
@@ -63,45 +104,31 @@ int main(int argc, const char* argv[])
 	#endif
 		
 	// Output barcode result
-	#if defined(WINDOWS)
-	char *pszTemp = (char*)malloc(4096);
-	#endif
-	if (iRet != DBR_OK && iRet != DBRERR_LICENSE_EXPIRED && iRet != DBRERR_QR_LICENSE_INVALID &&
-		iRet != DBRERR_1D_LICENSE_INVALID && iRet != DBRERR_PDF417_LICENSE_INVALID && iRet != DBRERR_DATAMATRIX_LICENSE_INVALID)
+	if (iRet != DBR_OK && iRet != DBRERR_MAXICODE_LICENSE_INVALID && iRet != DBRERR_AZTEC_LICENSE_INVALID && iRet != DBRERR_LICENSE_EXPIRED && iRet != DBRERR_QR_LICENSE_INVALID && iRet != DBRERR_GS1_COMPOSITE_LICENSE_INVALID &&
+		iRet != DBRERR_1D_LICENSE_INVALID && iRet != DBRERR_PDF417_LICENSE_INVALID && iRet != DBRERR_DATAMATRIX_LICENSE_INVALID && iRet != DBRERR_GS1_DATABAR_LICENSE_INVALID && iRet != DBRERR_PATCHCODE_LICENSE_INVALID)
 	{
-		#if defined(WINDOWS)
-		sprintf_s(pszTemp, 4096, "Failed to read barcode: %s\r\n", DBR_GetErrorString(iRet));
-		printf(pszTemp);
-		free(pszTemp);
-		#else 
-		printf("Failed to read barcode: %s\r\n", DBR_GetErrorString(iRet));
-		#endif
-		
+		printf("Failed to read barcode: %s\n", CBarcodeReader::GetErrorString(iRet));
 		return 0;
 	}
 
-	STextResultArray *paryResult = NULL;
+	TextResultArray *paryResult = NULL;
 	reader.GetAllTextResults(&paryResult);
-	
-	if (paryResult->nResultsCount == 0)
+		
+	if (paryResult->resultsCount == 0)
 	{
 		printf("No barcode found.\n");
 		CBarcodeReader::FreeTextResults(&paryResult);
 		return 0;
 	}
 	
-	printf("Total barcode(s) found: %d. Total time spent: %d ms\n\n", paryResult->nResultsCount, fCostTime);
-	for (int iIndex = 0; iIndex < paryResult->nResultsCount; iIndex++)
+	printf("Total barcode(s) found: %d. Total time spent: %d ms\n\n", paryResult->resultsCount, fCostTime);
+	for (int iIndex = 0; iIndex < paryResult->resultsCount; iIndex++)
 	{
 		printf("Barcode %d:\n", iIndex + 1);
-		printf("    Type: %s\n", paryResult->ppResults[iIndex]->pszBarcodeFormatString);
-		printf("    Text: %s\n", paryResult->ppResults[iIndex]->pszBarcodeText);
+		printf("    Type: %s\n", paryResult->results[iIndex]->barcodeFormatString);
+		printf("    Text: %s\n", paryResult->results[iIndex]->barcodeText);
 	}	
 
-	#if defined(WINDOWS)
-	free(pszTemp);
-	#endif
 	CBarcodeReader::FreeTextResults(&paryResult);
-
 	return 0;
 }
