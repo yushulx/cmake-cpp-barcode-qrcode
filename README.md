@@ -5,6 +5,12 @@ Version 7.2
 ## License
 Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx).
 
+Set the license key in `BarcodeReader.cxx`:
+
+```
+reader.InitLicense("LICENSE-KEY");
+```
+
 ## Contact Us
 https://www.dynamsoft.com/Company/Contact.aspx
 
