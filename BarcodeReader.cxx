@@ -6,57 +6,6 @@
 #include <sys/time.h>
 #endif
 
-const int GetBarcodeFormatId(int iIndex)
-{
-	switch(iIndex)
-	{
-	case 1:
-		return BF_ALL;
-	case 2:
-		return BF_ONED;
-	case 3:
-		return BF_QR_CODE;
-	case 4:
-		return BF_CODE_39;
-	case 5:
-		return BF_CODE_128;
-	case 6:
-		return BF_CODE_93;
-	case 7:
-		return BF_CODABAR;
-	case 8:
-		return BF_ITF;
-	case 9:
-		return BF_INDUSTRIAL_25;
-	case 10:
-		return BF_EAN_13;
-	case 11:
-		return BF_EAN_8;
-	case 12:
-		return BF_UPC_A;
-	case 13:
-		return BF_UPC_E;
-	case 14:
-		return BF_PDF417;
-	case 15:
-		return BF_DATAMATRIX;
-	case 16:
-		return BF_AZTEC;
-	case 17:
-		return BF_CODE_39_EXTENDED;
-	case 18:
-		return BF_MAXICODE;
-	case 19:
-		return BF_GS1_DATABAR;
-	case 20:
-		return BF_PATCHCODE;
-	case 21:
-		return BF_GS1_COMPOSITE;
-	default:
-		return -1;
-	}
-}
-
 void ToHexString(unsigned char* pSrc, int iLen, char* pDest)
 {
 	const char HEXCHARS[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -88,6 +37,16 @@ int main(int argc, const char* argv[])
 	CBarcodeReader reader;
 	const char* pszLicense = "LICENSE-KEY";
 	reader.InitLicense (pszLicense);
+
+	// DPM settings
+	char sError[512];
+	PublicRuntimeSettings* runtimeSettings = new PublicRuntimeSettings();
+	reader.GetRuntimeSettings(runtimeSettings);
+	//turn on the DPM mode
+	runtimeSettings->furtherModes.dpmCodeReadingModes[0] = DPMCRM_GENERAL;
+	runtimeSettings->localizationModes[0] = LM_STATISTICS_MARKS;
+	//update the runtime settings
+	reader.UpdateRuntimeSettings(runtimeSettings, sError, 512);
 
 	// Read barcode
 	#if defined(WINDOWS)
