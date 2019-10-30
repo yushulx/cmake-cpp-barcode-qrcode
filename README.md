@@ -50,10 +50,6 @@ https://www.dynamsoft.com/Company/Contact.aspx
     BarcodeReader.exe [barcode image file]
     ```
 
-### Screenshot
-
-![build barcode reader with cmake](images/screenshot.PNG)
-
 ## Linux 
 1. Install **CMake**:
     ```bash
@@ -93,6 +89,10 @@ https://www.dynamsoft.com/Company/Contact.aspx
     ```
     BarcodeReader [barcode image file]
     ```
+
+## Screenshot
+
+![Raspberry Pi Barcode Reader](https://www.codepool.biz/wp-content/uploads/2016/03/rpi_dbr_result.png)
 
 ## Reference
 * https://cmake.org/cmake-tutorial/
