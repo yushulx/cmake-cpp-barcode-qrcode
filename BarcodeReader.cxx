@@ -72,7 +72,7 @@ int main(int argc, const char* argv[])
 
 	// Set license
 	CBarcodeReader reader;
-	const char* pszLicense = "t0068NQAAAGLzp+bAPrZGSCvAFAG0h2+WxZMKkOkYkr6MX6nBwBxH+ex87pm+k9Cowzp4mLRpRCnwGpR2xlsUlr7nBQNdRDM=";
+	const char* pszLicense = "LICENSE-KEY";
 	reader.InitLicense (pszLicense);
 
 	int minimum_thread_count = 1;
