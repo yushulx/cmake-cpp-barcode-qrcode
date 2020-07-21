@@ -49,7 +49,7 @@ if(WINDOWS)
         target_link_libraries (BarcodeReader "DBRx86")
     endif()
 else()
-    target_link_libraries (BarcodeReader "DynamsoftBarcodeReader")
+    target_link_libraries (BarcodeReader "DynamsoftBarcodeReader" pthread)
 endif()
 
 if(WINDOWS)

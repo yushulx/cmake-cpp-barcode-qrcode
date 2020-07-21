@@ -47,7 +47,7 @@ https://www.dynamsoft.com/Company/Contact.aspx
 6. Run the app:
     ```
     cd e:\BarcodeReader\bin
-    BarcodeReader.exe [barcode image file]
+    BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
 ## Linux 
@@ -67,7 +67,7 @@ https://www.dynamsoft.com/Company/Contact.aspx
     ```
 5. Run the app:
     ```
-    BarcodeReader [barcode image file]
+    BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
 ## macOS
@@ -77,17 +77,22 @@ https://www.dynamsoft.com/Company/Contact.aspx
     ```
 2. Download [Dynamsoft Barcode Reader for macOS](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx?edition=macos&version=5.2). Copy **libDynamsoftBarcodeReader.dylib** to **platforms\macos**.
 3. Create a **build** folder:
+
     ```
     mkdir build
     cd build
     ```
+
 4. Build and install the project:
+
     ```bash
     cmake --build . --target install
     ```
+
 5. Run the app:
+
     ```
-    BarcodeReader [barcode image file]
+    BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
 ## Screenshot
