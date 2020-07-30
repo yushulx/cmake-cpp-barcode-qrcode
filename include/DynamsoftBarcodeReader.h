@@ -5,7 +5,7 @@
 *	Copyright 2020 Dynamsoft Corporation. All rights reserved.
 *	
 *	@author Dynamsoft
-*	@date 31/03/2020
+*	@date 21/07/2020
 */
 
 #ifndef __DYNAMSOFT_BARCODE_READER_H__
@@ -34,7 +34,7 @@ typedef void* HANDLE;
 * Dynamsoft Barcode Reader - C/C++ APIs Description.
 */
 
-#define DBR_VERSION                  "7.4.0.0331"
+#define DBR_VERSION                  "7.5.0.0721"
 
 #pragma region ErrorCode
 
@@ -350,28 +350,34 @@ typedef enum
 	/**No barcode format in BarcodeFormat group 2*/
 	BF2_NULL = 0x00,
 
-	/**Combined value of BF2_USPSINTELLIGENTMAIL, BF2_POSTNET, BF2_PLANET, BF2_AUSTRALIANPOST, BF2_RM4SCC. */
+	/**Combined value of BF2_USPSINTELLIGENTMAIL, BF2_POSTNET, BF2_PLANET, BF2_AUSTRALIANPOST, BF2_RM4SCC. 
+	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
 	BF2_POSTALCODE = 0x01F00000,
 
 	/**Nonstandard barcode */
 	BF2_NONSTANDARD_BARCODE = 0x01,
 
-	/**USPS Intelligent Mail. */
+	/**USPS Intelligent Mail. 
+	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
 	BF2_USPSINTELLIGENTMAIL = 0x00100000,
 
-	/**Postnet. */
+	/**Postnet. 
+	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
 	BF2_POSTNET = 0x00200000,
 
-	/**Planet. */
+	/**Planet. 
+	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
 	BF2_PLANET = 0x00400000,
 
-	/**Australian Post. */
+	/**Australian Post. 
+	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
 	BF2_AUSTRALIANPOST = 0x00800000,
 
-	/**Royal Mail 4-State Customer Barcode. */
+	/**Royal Mail 4-State Customer Barcode. 
+	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
 	BF2_RM4SCC = 0x01000000,
 
-	/**DotCode*/
+	/**DotCode. When you set this barcode format, the library will automatically add LM_STATISTICS_MARKS to LocalizationModes if you doesn't set it.*/
 	BF2_DOTCODE = 0x02
 }BarcodeFormat_2;
 
@@ -387,6 +393,13 @@ typedef enum
 
 	/**Complements the barcode using the general algorithm.*/
 	BCM_GENERAL = 0x02,
+
+	/**Reserved setting for barcode complement mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	BCM_REV = 0x80000000,
+#else
+	BCM_REV = -2147483648,
+#endif
 
 	/**Skips the barcode complement. */
 	BCM_SKIP = 0x00
@@ -466,6 +479,13 @@ typedef enum
 	/**Dark item on a light background surrounded by dark. Check @ref BICM for available argument settings.*/
 	BICM_DARK_ON_LIGHT_DARK_SURROUNDING = 0x20,
 	
+	/**Reserved setting for barcode colour mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	BICM_REV = 0x80000000,
+#else
+	BICM_REV = -2147483648,
+#endif
+	
 	/**Skips the barcode colour operation.  */
 	BICM_SKIP = 0x00
 
@@ -484,6 +504,16 @@ typedef enum
 	/**Binarizes the image based on the local block. Check @ref BM for available argument settings.*/
 	BM_LOCAL_BLOCK = 0x02,
 	
+	/**Performs image binarization based on the given threshold. Check @ref BM for available argument settings.*/
+	BM_THRESHOLD = 0x04,
+
+	/**Reserved setting for binarization mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	BM_REV = 0x80000000,
+#else
+	BM_REV = -2147483648,
+#endif
+	
 	/**Skips the binarization. */
 	BM_SKIP = 0x00
 
@@ -492,7 +522,7 @@ typedef enum
 /**
 * @enum ColourClusteringMode
 *
-* Describes the colour clustering mode.
+* Describes the colour clustering mode. Not supported yet.
 */
 typedef enum
 {
@@ -501,6 +531,13 @@ typedef enum
 	
 	/**Clusters colours using the general algorithm based on HSV. Check @ref CCM for available argument settings. */
 	CCM_GENERAL_HSV = 0x00000002,
+	
+	/**Reserved setting for colour clustering mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	CCM_REV = 0x80000000,
+#else
+	CCM_REV = -2147483648,
+#endif
 	
 	/**Skips the colour clustering. */
 	CCM_SKIP = 0x00
@@ -517,6 +554,13 @@ typedef enum
 	/**Converts a colour image to a grayscale image using the general algorithm. Check @ref CICM for available argument settings. */
 	CICM_GENERAL = 0x01,
 	
+	/**Reserved setting for colour conversion mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	CICM_REV = 0x80000000,
+#else
+	CICM_REV = -2147483648,
+#endif
+	
 	/**Skips the colour conversion. */
 	CICM_SKIP = 0x00
 	
@@ -532,8 +576,17 @@ typedef enum
 	/**Not supported yet. */
 	DPMCRM_AUTO = 0x01,
 	
-	/**Reads DPM code using the general algorithm. Valid only when LM_STATISTICS_MARKS is set.*/
+	/**Reads DPM code using the general algorithm. 
+	When this mode is set, the library will automatically add LM_STATISTICS_MARKS to LocalizationModes and add a BM_LOCAL_BLOCK to BinarizationModes which is with arguments:  
+	BlockSizeX=0, BlockSizeY=0, EnableFillBinaryVacancy=0, ImagePreprocessingModesIndex=1, ThreshValueCoefficient=15 if you doesn't set them.*/
 	DPMCRM_GENERAL = 0x02,
+	
+	/**Reserved setting for DPM code reading mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	DPMCRM_REV = 0x80000000,
+#else
+	DPMCRM_REV = -2147483648,
+#endif
 	
 	/**Skips DPM code reading. */
 	DPMCRM_SKIP = 0x00
@@ -579,6 +632,13 @@ typedef enum
 
 	/**Preprocesses the image using the morphology algorithm. Check @ref IPM for available argument settings.*/
 	IPM_MORPHOLOGY = 0x20,
+	
+	/**Reserved setting for image preprocessing mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	IPM_REV = 0x80000000,
+#else
+	IPM_REV = -2147483648,
+#endif
 	
 	/**Skips image preprocessing. */
 	IPM_SKIP = 0x00
@@ -667,6 +727,16 @@ typedef enum
 	/**Localizes barcodes by groups of connected blocks and lines.This is optimized for postal codes. */
 	LM_STATISTICS_POSTAL_CODE = 0x40,
 
+	/**Localizes barcodes from the centre of the image. Check @ref LM for available argument settings. */
+	LM_CENTRE = 0x80,
+
+	/**Reserved setting for localization mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	LM_REV = 0x80000000,
+#else
+	LM_REV = -2147483648,
+#endif
+
 	/**Skips localization. */
 	LM_SKIP = 0x00
 	
@@ -715,6 +785,13 @@ typedef enum
 	/**Detects region using the general algorithm based on HSV colour contrast. Check @ref RPM for available argument settings.*/
 	RPM_GENERAL_HSV_CONTRAST = 0x10,
 	
+	/**Reserved setting for region predection mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	RPM_REV = 0x80000000,
+#else
+	RPM_REV = -2147483648,
+#endif
+	
 	/**Skips region detection. */
 	RPM_SKIP = 0x00
 	
@@ -732,6 +809,13 @@ typedef enum
 	
 	/**Resists deformation using the general algorithm. Check @ref DRM for available argument settings.*/
 	DRM_GENERAL = 0x02,
+	
+	/**Reserved setting for deformation resisting mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	DRM_REV = 0x80000000,
+#else
+	DRM_REV = -2147483648,
+#endif
 	
 	/**Skips deformation resisting. */
 	DRM_SKIP = 0x00
@@ -802,6 +886,13 @@ typedef enum
 	/**Uses the accompanying text to verify and patch the decoded barcode result. Check @ref TACM for available argument settings.*/
 	TACM_VERIFYING_PATCHING = 0x04,
 	
+	/**Reserved setting for text assisted correction mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	TACM_REV = 0x80000000,
+#else
+	TACM_REV = -2147483648,
+#endif
+	
 	/**Skips the text assisted correction. */
 	TACM_SKIP = 0x00
 	
@@ -819,6 +910,13 @@ typedef enum
 	
 	/**Filters text using the general algorithm based on contour. Check @ref TFM for available argument settings.*/
 	TFM_GENERAL_CONTOUR = 0x02,
+	
+	/**Reserved setting for text filter mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	TFM_REV = 0x80000000,
+#else
+	TFM_REV = -2147483648,
+#endif
 	
 	/**Skips text filtering. */
 	TFM_SKIP = 0x00
@@ -859,6 +957,13 @@ typedef enum
 	/**Returns the text results in alphabetical and numerical order by barcode format string. */
 	TROM_FORMAT = 0x04,
 	
+	/**Reserved setting for text result order mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	TROM_REV = 0x80000000,
+#else
+	TROM_REV = -2147483648,
+#endif
+	
 	/**Skips the result ordering operation. */
 	TROM_SKIP = 0x00
 	
@@ -877,6 +982,13 @@ typedef enum
 	/**Detects texture using the general algorithm. Check @ref TDM for available argument settings.*/
 	TDM_GENERAL_WIDTH_CONCENTRATION = 0X02,
 	
+	/**Reserved setting for texture detection mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	TDM_REV = 0x80000000,
+#else
+	TDM_REV = -2147483648,
+#endif
+	
 	/**Skips texture detection. */
 	TDM_SKIP = 0x00
 	
@@ -894,6 +1006,13 @@ typedef enum
 	
 	/**Keeps the original grayscale. Recommended for dark on light images. */
 	GTM_ORIGINAL = 0x02,
+	
+	/**Reserved setting for grayscale transformation mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	GTM_REV = 0x80000000,
+#else
+	GTM_REV = -2147483648,
+#endif
 	
 	/**Skips grayscale transformation. */
 	GTM_SKIP = 0x00
@@ -958,6 +1077,13 @@ typedef enum
 	/**Scales up using the nearest-neighbour interpolation method. Check @ref SUM for available argument settings.*/
 	SUM_NEAREST_NEIGHBOUR_INTERPOLATION = 0x04,
 
+	/**Reserved setting for scale up mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	SUM_REV = 0x80000000,
+#else
+	SUM_REV = -2147483648,
+#endif
+
 	/**Skip the scale-up process.*/
 	SUM_SKIP = 0x00
 
@@ -972,6 +1098,13 @@ typedef enum
 {
 	/** Recognizes accompanying texts using the general algorithm. Check @ref ATRM for available argument settings.*/
 	ATRM_GENERAL = 0x01,
+
+	/**Reserved setting for accompanying text recognition mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	ATRM_REV = 0x80000000,
+#else
+	ATRM_REV = -2147483648,
+#endif
 
 	/** Skips the accompanying text recognition. */
 	ATRM_SKIP = 0x00
@@ -1014,7 +1147,14 @@ typedef enum
 	PDFRM_VECTOR = 0x02,
 
 	/** Converts the PDF file to image(s) first, then perform barcode recognition.*/
-	PDFRM_RASTER = 0x04
+	PDFRM_RASTER = 0x04,
+
+	/**Reserved setting for PDF reading mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	PDFRM_REV = 0x80000000,
+#else
+	PDFRM_REV = -2147483648,
+#endif
 }PDFReadingMode;
 
 /**
@@ -1242,7 +1382,7 @@ typedef struct tagFurtherModes
 	* 	    [DPMCRM_SKIP,DPMCRM_SKIP,DPMCRM_SKIP,DPMCRM_SKIP,DPMCRM_SKIP,DPMCRM_SKIP,DPMCRM_SKIP,DPMCRM_SKIP]
 	* @par Remarks:
 	*     The array index represents the priority of the item. The smaller index is, the higher priority is.
-	* @sa ColourConversionMode
+	* @sa DPMCodeReadingMode
 	*/
 	DPMCodeReadingMode dpmCodeReadingModes[8];
 
@@ -1402,7 +1542,7 @@ typedef struct tagPublicRuntimeSettings
 	/**Sets the threshold for the image shrinking.
 	*
 	* @par Value range:
-	* 	    [512, 0x7fffffff]
+	* 	    [8, 0x7fffffff]
 	* @par Default value:
 	* 	    2300
 	* @par Remarks:
@@ -1956,8 +2096,23 @@ typedef struct tagOneDCodeDetails
 	/**The length of the check digit chars byte array */
 	int checkDigitBytesLength;
 
+	/**The position of the start pattern relative to the barcode location.  
+	Index 0 : X coordinate of the start position in percentage value;  
+	Index 1 : X coordinate of the end position in percentage value.*/
+	float startPatternRange[2];
+
+	/**The position of the middle pattern relative to the barcode location.  
+	Index 0 : X coordinate of the start position in percentage value;  
+	Index 1 : X coordinate of the end position in percentage value.*/
+	float middlePatternRange[2];
+
+	/**The position of the end pattern relative to the barcode location.  
+	Index 0 : X coordinate of the start position in percentage value;  
+	Index 1 : X coordinate of the end position in percentage value.*/
+	float endPatternRange[2];
+
 	/**Reserved memory for the struct. The length of this array indicates the size of the memory reserved for this struct. */
-	char reserved[32];
+	char reserved[8];
 }OneDCodeDetails;
 
 /**
@@ -2533,6 +2688,14 @@ extern "C" {
 	 */
 	DBR_API void DBR_DestroyInstance(void* barcodeReader);
 
+
+	/**
+	* Coming soon. Not supported yet.
+	* 
+	*/
+	DBR_API int DBR_InitLicenseFromLTS(void* barcodeReader, const char* licenseInfo, const char* LTSuuid, const char* clientuuid);
+
+
 	/**
 	 * Reads product key and activates the SDK.
 	 * 
@@ -2782,7 +2945,7 @@ extern "C" {
 	 * @code
 			void* barcodeReader = DBR_CreateInstance();
 			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			int errorCode = DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 720, IPF_BINARY, "");
+			int errorCode = DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 			DBR_DestroyInstance(barcodeReader);
 	 * @endcode
 	 *
@@ -2813,9 +2976,9 @@ extern "C" {
 	*		{
 	*			parameters.maxQueueLength = 3;
 	*			parameters.maxResultQueueLength = 10;
-	*			parameters.width = 20;
-	*			parameters.height = 30;
-	*			parameters.stride = 10;
+	*			parameters.width = 1024;
+	*			parameters.height = 720;
+	*			parameters.stride = 1024;
 	*			parameters.imagePixelFormat = IPF_GRAYSCALED;
 	*			parameters.region.regionMeasuredByPercentage = 1;
 	*			parameters.region.regionTop = 0;
@@ -3446,7 +3609,7 @@ extern "C" {
 			void* barcodeReader = DBR_CreateInstance();
 			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
 			DBR_SetErrorCallback(barcodeReader, ErrorFunction, NULL);
-			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 720, IPF_BINARY, "");
+			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 	 * @endcode
 	 *
 	 */
@@ -3473,7 +3636,7 @@ extern "C" {
 			void* barcodeReader = DBR_CreateInstance();
 			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
 			DBR_SetTextResultCallback(barcodeReader, TextResultFunction, NULL);
-			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 720, IPF_BINARY, "");
+			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 	 * @endcode
 	 *
 	 */
@@ -3505,7 +3668,7 @@ extern "C" {
 			char errorMessage[256];
 			DBR_UpdateRuntimeSettings(barcodeReader, &settings, errorMessage, 256);
 			DBR_SetIntermediateResultCallback(barcodeReader, IntermediateResultFunction, NULL);
-			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 720, IPF_BINARY, "");
+			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 	 * @endcode
 	 *
 	 */
@@ -3633,6 +3796,8 @@ public:
 	* @name Initiation Functions
 	* @{
 	*/
+
+	int InitLicenseFromLTS(const char* licenseInfo, const char* LTSuuid, const char* clientuuid);
 
 	/**
 	 * Reads product key and activates the SDK.
@@ -3881,7 +4046,7 @@ public:
 	 * @code
 			CBarcodeReader* reader = new CBarcodeReader();
 			reader->InitLicense("t0260NwAAAHV***************");
-			reader->StartFrameDecoding(2, 10, 1024, 720, 720, IPF_BINARY, "");
+			reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 			delete reader;
 	 * @endcode
 	 *
@@ -3910,9 +4075,9 @@ public:
 	*		{
 	*			parameters.maxQueueLength = 3;
 	*			parameters.maxResultQueueLength = 10;
-	*			parameters.width = 20;
-	*			parameters.height = 30;
-	*			parameters.stride = 10;
+	*			parameters.width = 1024;
+	*			parameters.height = 720;
+	*			parameters.stride = 1024;
 	*			parameters.imagePixelFormat = IPF_GRAYSCALED;
 	*			parameters.region.regionMeasuredByPercentage = 1;
 	*			parameters.region.regionTop = 0;
@@ -4533,7 +4698,7 @@ public:
 			CBarcodeReader* reader = new CBarcodeReader();
 			reader->InitLicense("t0260NwAAAHV***************");
 			reader->SetErrorCallback(ErrorFunction, NULL);
-			reader->StartFrameDecoding(2, 10, 1024, 720, 720, IPF_BINARY, "");
+			reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 	 * @endcode
 	 *
 	 */
@@ -4559,7 +4724,7 @@ public:
 			CBarcodeReader* reader = new CBarcodeReader();
 			reader->InitLicense("t0260NwAAAHV***************");
 			reader->SetTextResultCallback(TextResultFunction, NULL);
-			reader->StartFrameDecoding(2, 10, 1024, 720, 720, IPF_BINARY, "");
+			reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 	 * @endcode
 	 *
 	 */
@@ -4590,7 +4755,7 @@ public:
 			char errorMessage[256];
 			reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
 			reader->SetIntermediateResultCallback(IntermediateResultFunction, NULL);
-			reader->StartFrameDecoding(2, 10, 1024, 720, 720, IPF_BINARY, "");
+			reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
 	 * @endcode
 	 *
 	 */

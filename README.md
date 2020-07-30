@@ -1,6 +1,6 @@
 # Building C/C++ Barcode Reader with CMake
 
-Version 7.4
+Version 7.5
 
 ## License
 Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx).
@@ -18,7 +18,7 @@ https://www.dynamsoft.com/Company/Contact.aspx
 ### Installation
 * [Visual Studio Community](https://www.visualstudio.com/downloads/)
 * [cmake-3.9.5-win64-x64.msi](https://cmake.org/files/v3.9/cmake-3.9.5-win64-x64.msi)
-* [Dynamsoft Barcode Reader v7.4](https://www.dynamsoft.com/Downloads/Downloads.aspx) (Windows x86/x64, Linux x64, macOS x64 and Raspberry Pi ARMv7)
+* [Dynamsoft Barcode Reader v7.5](https://www.dynamsoft.com/Downloads/Downloads.aspx) (Windows x86/x64, Linux x64, macOS x64 and Raspberry Pi ARMv7)
 
 ### Steps
 1. Copy `DBRx86.lib/DBRx64.lib` to `platforms\win\lib` and copy `DynamsoftBarcodeReaderx86.dll/DynamsoftBarcodeReaderx64.dll` to `platforms\win\bin` folder.
