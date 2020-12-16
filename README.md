@@ -2,12 +2,15 @@
 
 Version 8.0
 
+## Requirements
+- [Visual Studio](https://www.visualstudio.com/downloads/)
+- [CMake](https://cmake.org/download/)
+- [Dynamsoft Barcode Reader v8.0](https://www.dynamsoft.com/barcode-reader/downloads) (Windows x86/x64, Linux x64, macOS x64 and Raspberry Pi ARMv7)
+
 ## License
-Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx).
+Get a [trial license](https://www.dynamsoft.com/customer/license/trialLicense) and set the license key in `BarcodeReader.cxx`:
 
-Set the license key in `BarcodeReader.cxx`:
-
-```
+```cpp
 reader.InitLicense("LICENSE-KEY");
 ```
 
@@ -15,32 +18,20 @@ reader.InitLicense("LICENSE-KEY");
 https://www.dynamsoft.com/Company/Contact.aspx
 
 ## Windows
-### Installation
-* [Visual Studio Community](https://www.visualstudio.com/downloads/)
-* [cmake-3.9.5-win64-x64.msi](https://cmake.org/files/v3.9/cmake-3.9.5-win64-x64.msi)
-* [Dynamsoft Barcode Reader v7.5](https://www.dynamsoft.com/Downloads/Downloads.aspx) (Windows x86/x64, Linux x64, macOS x64 and Raspberry Pi ARMv7)
-
-### Steps
 1. Copy `DBRx86.lib/DBRx64.lib` to `platforms\win\lib` and copy `DynamsoftBarcodeReaderx86.dll/DynamsoftBarcodeReaderx64.dll` to `platforms\win\bin` folder.
 2. Create a **build** folder:
     ```
     mkdir build
     cd build
     ```
-3. Edit **CMakeLists.txt** to replace the installation path with yours:
-    ```
-    set(CMAKE_INSTALL_PREFIX "e:/${PROJECT_NAME}")
-    ```
-4. Generate project configuration files:
+3. Configure and build the project:
     ```bash
     // x86
     cmake -DCMAKE_GENERATOR_PLATFORM=x86 ..
 
     // x64
     cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..
-    ```
-5. Build the project:
-    ```
+    
     cmake --build . --config release
     ```
 6. Run the app:
@@ -48,19 +39,20 @@ https://www.dynamsoft.com/Company/Contact.aspx
     Release\BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
-## Linux 
+## Linux and Raspberry Pi OS
 1. Install **CMake**:
     ```bash
     sudo apt-get install cmake
     ```
-2. Download [Dynamsoft Barcode Reader for Linux](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-for-Linux-Download.aspx). Copy **libDynamsoftBarcodeReader.so** to **platforms\linux**.
+2. Copy **libDynamsoftBarcodeReader.so** to **platforms\linux**.
 3. Create a **build** folder:
     ```
     mkdir build
     cd build
     ```
-4. Build the project:
+4. Configure and build the project:
     ```bash
+    cmake ..
     cmake --build . --config release 
     ```
 5. Run the app:
@@ -73,7 +65,7 @@ https://www.dynamsoft.com/Company/Contact.aspx
     ```bash
     brew install cmake
     ```
-2. Download [Dynamsoft Barcode Reader for macOS](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx?edition=macos&version=5.2). Copy **libDynamsoftBarcodeReader.dylib** to **platforms\macos**.
+2. Copy **libDynamsoftBarcodeReader.dylib** to **platforms\macos**.
 3. Create a **build** folder:
 
     ```
@@ -81,9 +73,10 @@ https://www.dynamsoft.com/Company/Contact.aspx
     cd build
     ```
 
-4. Build the project:
+4. Configure and build the project:
 
     ```bash
+    cmake ..
     cmake --build . --config release 
     ```
 
