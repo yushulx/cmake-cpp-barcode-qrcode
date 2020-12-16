@@ -1,6 +1,6 @@
 # Building C/C++ Barcode Reader with CMake
 
-Version 7.5
+Version 8.0
 
 ## License
 Get the [trial license](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx).
@@ -31,23 +31,21 @@ https://www.dynamsoft.com/Company/Contact.aspx
     ```
     set(CMAKE_INSTALL_PREFIX "e:/${PROJECT_NAME}")
     ```
-4. Generate project configuration files for win32:
+4. Generate project configuration files:
     ```bash
-    cmake ..
-    ```
+    // x86
+    cmake -DCMAKE_GENERATOR_PLATFORM=x86 ..
 
-    For win64:
-    ```bash
-    cmake -G"Visual Studio 14 2015 Win64" ..
+    // x64
+    cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..
     ```
-5. Build and install the project:
+5. Build the project:
     ```
-    cmake --build . --target install
+    cmake --build . --config release
     ```
 6. Run the app:
     ```
-    cd e:\BarcodeReader\bin
-    BarcodeReader [image-file] [optional: license-file] [optional: template-file]
+    Release\BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
 ## Linux 
@@ -61,13 +59,13 @@ https://www.dynamsoft.com/Company/Contact.aspx
     mkdir build
     cd build
     ```
-4. Build and install the project:
+4. Build the project:
     ```bash
-    sudo cmake --build . --target install
+    cmake --build . --config release 
     ```
 5. Run the app:
     ```
-    BarcodeReader [image-file] [optional: license-file] [optional: template-file]
+    ./BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
 ## macOS
@@ -83,16 +81,16 @@ https://www.dynamsoft.com/Company/Contact.aspx
     cd build
     ```
 
-4. Build and install the project:
+4. Build the project:
 
     ```bash
-    cmake --build . --target install
+    cmake --build . --config release 
     ```
 
 5. Run the app:
 
     ```
-    BarcodeReader [image-file] [optional: license-file] [optional: template-file]
+    ./BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
 ## Screenshot

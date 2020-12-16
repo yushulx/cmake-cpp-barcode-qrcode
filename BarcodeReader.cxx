@@ -6,6 +6,7 @@
 #include <thread>
 
 using namespace std;
+using namespace dynamsoft::dbr;
 
 #if defined(LINUX) || defined(MACOS)
 	#include <sys/time.h>
