@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project (BarcodeReader)
 MESSAGE( STATUS "PROJECT_NAME: " ${PROJECT_NAME} )
+SET(CMAKE_CXX_FLAGS "-std=c++11 -O3")
 
 # The version number.
 set(BarcodeReader_VERSION_MAJOR 8)
