@@ -5,7 +5,7 @@ Version 8.1
 ## Requirements
 - [Visual Studio](https://www.visualstudio.com/downloads/)
 - [CMake](https://cmake.org/download/)
-- [Dynamsoft Barcode Reader v8.0 C/C++ Package](https://www.dynamsoft.com/barcode-reader/downloads) (Windows x86/x64, Linux x64, macOS x64 and Raspberry Pi ARMv7)
+- [Dynamsoft Barcode Reader v8.1 C/C++ Package](https://www.dynamsoft.com/barcode-reader/downloads) (Windows x86/x64, Linux x64, macOS x64 and Raspberry Pi ARMv7)
 
 ## License
 Get a [trial license](https://www.dynamsoft.com/customer/license/trialLicense) and set the license key in `BarcodeReader.cxx`:
