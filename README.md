@@ -1,6 +1,6 @@
 # Building C/C++ Barcode Reader with CMake
 
-Version 8.0
+Version 8.1
 
 ## Requirements
 - [Visual Studio](https://www.visualstudio.com/downloads/)

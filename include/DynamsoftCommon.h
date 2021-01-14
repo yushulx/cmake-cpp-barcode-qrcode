@@ -13,10 +13,14 @@
 #endif
 #endif
 
+/**No license.*/
+#define DMERR_NO_LICENSE -20000
+
+/**The Handshake Code is invalid.*/
 #define DMERR_HANDSHAKE_CODE_INVALID -20001
 
 /**Failed to read or write license buffer. */
-#define DMERR_LICENSE_BUFFFER_FAILED	-20002
+#define DMERR_LICENSE_BUFFER_FAILED	-20002
 
 /**Failed to synchronize license info with license tracking server. */
 #define DMERR_LICENSE_SYNC_FAILED	-20003
@@ -29,6 +33,22 @@
 
 /**Interface InitLicenseFromLTS can not be used together with other license initiation interfaces. */
 #define DMERR_LICENSE_INTERFACE_CONFLICT -20006
+
+/**License Client dll is missing.*/
+#define DMERR_LICENSE_CLIENT_DLL_MISSING -20007
+
+/**Instance count is over limit.*/
+#define DMERR_INSTANCE_COUNT_OVER_LIMIT -20008
+
+/**Interface InitLicenseFromLTS has to be called before creating any SDK objects.*/
+#define DMERR_LICENSE_INIT_SEQUENCE_FAILED -20009
+
+/**Trial License*/
+#define DMERR_TRIAL_LICENSE -20010
+
+/**Failed to reach License Tracking Server.*/
+#define DMERR_FAILED_TO_REACH_LTS -20200
+
 
 /**
 * @enum DM_DeploymentType
@@ -189,8 +209,11 @@ typedef struct tagDM_LTSConnectionParameters
 	/**Sets the license modules to use.*/
 	DM_LicenseModule* limitedLicenseModules;
 
+	/**Sets the max concurrent instance count.*/
+	int maxConcurrentInstanceCount;
+
 	/**Reserved memory for struct. The length of this array indicates the size of the memory reserved for this struct.*/
-	char reserved[64];
+	char reserved[60];
 }DM_LTSConnectionParameters;
 
 /**

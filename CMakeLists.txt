@@ -5,7 +5,7 @@ SET(CMAKE_CXX_FLAGS "-std=c++11 -O3")
 
 # The version number.
 set(BarcodeReader_VERSION_MAJOR 8)
-set(BarcodeReader_VERSION_MINOR 0)
+set(BarcodeReader_VERSION_MINOR 1)
 
 # Check platforms
 if (CMAKE_HOST_WIN32)
