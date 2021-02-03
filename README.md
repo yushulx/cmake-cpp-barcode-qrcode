@@ -1,4 +1,5 @@
 # Building C/C++ Barcode Reader with CMake
+![](https://api.travis-ci.com/Dynamsoft/cmake.svg?branch=master)
 
 Version 8.1
 
