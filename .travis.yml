@@ -3,6 +3,8 @@ language: cpp
 jobs:
   include:
     - os: linux
+      arch: arm64
+    - os: linux
       arch: amd64
     - os: windows
       arch: amd64
