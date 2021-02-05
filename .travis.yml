@@ -16,8 +16,9 @@ branches:
     - master
       
 script:
+    - echo ${TRAVIS_CPU_ARCH}
     - if [[ ${TRAVIS_CPU_ARCH} == "arm64"]]; then 
-        cp ./platforms/aarch64/libDynamsoftBarcodeReader.so /usr/lib/;
+        cp $(pwd)/platforms/aarch64/libDynamsoftBarcodeReader.so /usr/lib/libDynamsoftBarcodeReader.so;
       fi
     - mkdir -p build
     - cd build
