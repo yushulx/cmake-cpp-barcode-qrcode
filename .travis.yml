@@ -17,8 +17,8 @@ script:
     - mkdir -p build
     - cd build
     - if [[ ${TRAVIS_OS_NAME} == "windows" ]]; then
-        cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..
+        cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..;
       else
-        cmake ..
+        cmake ..;
       fi
     - cmake --build . --config release
