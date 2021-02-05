@@ -16,11 +16,7 @@ branches:
     - master
       
 script:
-    - echo ${TRAVIS_CPU_ARCH}
-    - if [[ ${TRAVIS_CPU_ARCH} == "arm64"]]; then 
-        cp $(pwd)/platforms/aarch64/libDynamsoftBarcodeReader.so /usr/lib/libDynamsoftBarcodeReader.so;
-      fi
-    - mkdir -p build
+    - mkdir build
     - cd build
     - if [[ ${TRAVIS_OS_NAME} == "windows" ]]; then
         cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..;
