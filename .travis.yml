@@ -1,18 +1,24 @@
 language: cpp
 
-os:
-  - linux
-  - windows
+jobs:
+  include:
+    - os: linux
+      arch: amd64
+    - os: windows
+      arch: amd64
+    - os: osx
+      arch: amd64
+
+branches:
+  only:
+    - master
       
 script:
     - mkdir -p build
     - cd build
-    - |
-      if [[ ${TRAVIS_OS_NAME} == "linux" ]]; then
-        cmake ..
-      fi
-    - |
-      if [[ ${TRAVIS_OS_NAME} == "windows" ]]; then
+    - if [[ ${TRAVIS_OS_NAME} == "windows" ]]; then
         cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..
+      else
+        cmake ..
       fi
     - cmake --build . --config release
