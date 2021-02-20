@@ -4,23 +4,39 @@ jobs:
   include:
     - os: linux
       arch: arm64
+      env: OS=arm64_linux
     - os: linux
       arch: amd64
+      env: OS=amd64_linux
     - os: windows
       arch: amd64
+      env: OS=windows
     - os: osx
       arch: amd64
+      env: OS=osx
+    - os: linux
+      arch: arm64
+      env: OS=arm32_linux
+      before_install:
+        - sudo dpkg --add-architecture armhf
+        - sudo apt-get update
+        - sudo apt-get install crossbuild-essential-armhf libc6:armhf libstdc++6:armhf
+        - CC=arm-linux-gnueabihf-gcc
 
 branches:
   only:
     - master
-      
+
 script:
     - mkdir build
     - cd build
     - if [[ ${TRAVIS_OS_NAME} == "windows" ]]; then
         cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..;
       else
-        cmake ..;
+        if [ $OS == "arm32_linux" ]; then
+          cmake -DARM32_BUILD=TRUE ..;
+        else
+          cmake ..;
+        fi
       fi
     - cmake --build . --config release
