@@ -21,7 +21,6 @@ jobs:
         - sudo dpkg --add-architecture armhf
         - sudo apt-get update
         - sudo apt-get install crossbuild-essential-armhf libc6:armhf libstdc++6:armhf
-        - CC=arm-linux-gnueabihf-gcc
 
 branches:
   only:
@@ -34,6 +33,9 @@ script:
         cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..;
       else
         if [ $OS == "arm32_linux" ]; then
+          export CC=arm-linux-gnueabihf-gcc;
+          export CXX=arm-linux-gnueabihf-g++;
+          export AR=arm-linux-gnueabihf-ar;
           cmake -DARM32_BUILD=TRUE ..;
         else
           cmake ..;
