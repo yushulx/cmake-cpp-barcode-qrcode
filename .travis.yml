@@ -20,7 +20,7 @@ jobs:
       before_install:
         - sudo dpkg --add-architecture armhf
         - sudo apt-get update
-        - sudo apt-get install crossbuild-essential-armhf libc6:armhf libstdc++6:armhf
+        - sudo apt-get install libc6:armhf libstdc++6:armhf
         - CC=arm-linux-gnueabihf-gcc
 
 branches:
