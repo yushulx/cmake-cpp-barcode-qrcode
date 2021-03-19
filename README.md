@@ -1,7 +1,7 @@
 # Building C/C++ Barcode Reader with CMake
 
 [![release](https://img.shields.io/github/release/Dynamsoft/cmake.svg)](https://github.com/Dynamsoft/cmake/releases/latest)
-[![status](https://api.travis-ci.com/Dynamsoft/cmake.svg?branch=master)](https://travis-ci.com/github/Dynamsoft/cmake)
+[![Travis CI status](https://img.shields.io/travis/dynamsoft/cmake/master?label=Travis%20CI&logo=travis)](https://travis-ci.com/github/Dynamsoft/cmake)
 
 ## Requirements
 - [Visual Studio](https://www.visualstudio.com/downloads/)
