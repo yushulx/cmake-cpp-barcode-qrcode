@@ -1,14 +1,3 @@
-/*
-*	@file DynamsoftBarcodeReader.h
-*
-*	Dynamsoft Barcode Reader C/C++ API header file.
-*	Copyright 2021 Dynamsoft Corporation. All rights reserved.
-*
-*	@author Dynamsoft
-*   @version 8.1
-*	@date 05/01/2021
-*/
-
 #ifndef __DYNAMSOFT_BARCODE_READER_H__
 #define __DYNAMSOFT_BARCODE_READER_H__
 
@@ -2104,9 +2093,12 @@ typedef struct tagTextResult
 	
 	/**Exception */
 	const char* exception;
-
+	
+	/**DPM mark */
+	int isDPM;
+	
 	/**Reserved memory for the struct. The length of this array indicates the size of the memory reserved for this struct. */
-	char reserved[52];
+	char reserved[48];
 }TextResult, *PTextResult;
 
 /**
@@ -2215,9 +2207,22 @@ typedef struct tagQRCodeDetails
 
 	/**Number of the models */
 	int model;
+	
+	/**Identify the first data encoding mode */
+	int mode;
+	
+	/**Identify the position of the particular symbol */
+	int page;
+
+	/**Identify the total number of symbols to be concatenated int the Structured Append format */
+	int totalPage;
+	
+	/**The Parity Data shall be an 8 bit byte following the Symbol Sequence Indicator. 
+	The parity data is a value obtained by XORing byte by byte the ASCII/JIS values of all the original input data before division into symbol blocks. */
+	unsigned char parityData;
 
 	/**Reserved memory for the struct. The length of this array indicates the size of the memory reserved for this struct. */
-	char reserved[32];
+	char reserved[16];
 }QRCodeDetails;
 
 /**
