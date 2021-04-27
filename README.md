@@ -3,13 +3,18 @@
 [![release](https://img.shields.io/github/release/Dynamsoft/cmake.svg)](https://github.com/Dynamsoft/cmake/releases/latest)
 [![Travis CI status](https://img.shields.io/travis/dynamsoft/cmake/master?label=Travis%20CI&logo=travis)](https://travis-ci.com/github/Dynamsoft/cmake)
 
-## Requirements
-- [Visual Studio](https://www.visualstudio.com/downloads/)
-- [CMake](https://cmake.org/download/)
-- [Dynamsoft Barcode Reader v8.1 C/C++ Package](https://www.dynamsoft.com/barcode-reader/downloads) (Windows x86/x64, Linux x64/ARM64, macOS x64 and Raspberry Pi ARMv7)
+## What You Should Know
+- [![](https://img.shields.io/badge/Download-Offline%20SDK-orange)](https://www.dynamsoft.com/barcode-reader/downloads) 
+- [![](https://img.shields.io/badge/Get-30--day%20FREE%20Trial%20License-blue)](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr)
 
-## License
-Get a [trial license](https://www.dynamsoft.com/customer/license/trialLicense) and set the license key in `BarcodeReader.cxx`:
+## Supported Platforms
+- Windows x86/x64
+- Linux x64/ARM64
+- macOS x64 
+- Raspberry Pi ARMv7
+
+## Setting License
+Set the license key in `BarcodeReader.cxx`:
 
 ```cpp
 reader.InitLicense("LICENSE-KEY");
