@@ -206,15 +206,40 @@ typedef void* HANDLE;
  * @}defgroup ErrorCode
  */
 #pragma endregion
+#pragma pack(push)
+#pragma pack(1)
+ /**
+ * @defgroup DBRPoint DBRPoint
+ * @{
+ */
+ /**
+ * Stores an x- and y-coordinate pair in two-dimensional space.
+ *
+ */
+typedef struct tagDBRPoint
+{
+	/**The X coordinate of the point */
+	int x;
+
+	/**The Y coordinate of the point */
+	int y;
+}DBRPoint, *PDBRPoint;
+/**
+* @} defgroup DBRPoint
+*/
+
+#pragma pack(pop)
 
 #pragma region Enum
 
+#ifndef _COMMON_PART2_
+#define _COMMON_PART2_
 /**
 * @enum ImagePixelFormat
 *
 * Describes the image pixel format.
 */
-typedef enum
+typedef enum ImagePixelFormat
 {
 	/**0:Black, 1:White */
 	IPF_BINARY,
@@ -286,41 +311,32 @@ typedef enum BinarizationMode
 }BinarizationMode;
 
 /**
-* @enum ImagePreprocessingMode
+* @enum ScaleUpMode
 *
-* Describes the image preprocessing mode.
+* Describes the scale up mode .
 */
-typedef enum ImagePreprocessingMode
+typedef enum ScaleUpMode
 {
-	/**Not supported yet. */
-	IPM_AUTO = 0x01,
+	/**The library chooses an interpolation method automatically to scale up.*/
+	SUM_AUTO = 0x01,
 
-	/**Takes the unpreprocessed image for following operations. */
-	IPM_GENERAL = 0x02,
+	/**Scales up using the linear interpolation method. Check @ref SUM for available argument settings.*/
+	SUM_LINEAR_INTERPOLATION = 0x02,
 
-	/**Preprocesses the image using the gray equalization algorithm. Check @ref IPM for available argument settings.*/
-	IPM_GRAY_EQUALIZE = 0x04,
+	/**Scales up using the nearest-neighbour interpolation method. Check @ref SUM for available argument settings.*/
+	SUM_NEAREST_NEIGHBOUR_INTERPOLATION = 0x04,
 
-	/**Preprocesses the image using the gray smoothing algorithm. Check @ref IPM for available argument settings.*/
-	IPM_GRAY_SMOOTH = 0x08,
-
-	/**Preprocesses the image using the sharpening and smoothing algorithm. Check @ref IPM for available argument settings.*/
-	IPM_SHARPEN_SMOOTH = 0x10,
-
-	/**Preprocesses the image using the morphology algorithm. Check @ref IPM for available argument settings.*/
-	IPM_MORPHOLOGY = 0x20,
-
-	/**Reserved setting for image preprocessing mode.*/
+	/**Reserved setting for scale up mode.*/
 #if defined(_WIN32) || defined(_WIN64)
-	IPM_REV = 0x80000000,
+	SUM_REV = 0x80000000,
 #else
-	IPM_REV = -2147483648,
+	SUM_REV = -2147483648,
 #endif
 
-	/**Skips image preprocessing. */
-	IPM_SKIP = 0x00
+	/**Skip the scale-up process.*/
+	SUM_SKIP = 0x00
 
-}ImagePreprocessingMode;
+}ScaleUpMode;
 
 typedef enum RegionPredetectionMode
 {
@@ -481,36 +497,225 @@ typedef enum BarcodeFormat_2
 	/**No barcode format in BarcodeFormat group 2*/
 	BF2_NULL = 0x00,
 
-	/**Combined value of BF2_USPSINTELLIGENTMAIL, BF2_POSTNET, BF2_PLANET, BF2_AUSTRALIANPOST, BF2_RM4SCC.
-	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
+	/**Combined value of BF2_USPSINTELLIGENTMAIL, BF2_POSTNET, BF2_PLANET, BF2_AUSTRALIANPOST, BF2_RM4SCC.*/
 	BF2_POSTALCODE = 0x01F00000,
 
 	/**Nonstandard barcode */
 	BF2_NONSTANDARD_BARCODE = 0x01,
 
-	/**USPS Intelligent Mail.
-	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
+	/**USPS Intelligent Mail.*/
 	BF2_USPSINTELLIGENTMAIL = 0x00100000,
 
-	/**Postnet.
-	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
+	/**Postnet.*/
 	BF2_POSTNET = 0x00200000,
 
-	/**Planet.
-	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
+	/**Planet.*/
 	BF2_PLANET = 0x00400000,
 
-	/**Australian Post.
-	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
+	/**Australian Post.*/
 	BF2_AUSTRALIANPOST = 0x00800000,
 
-	/**Royal Mail 4-State Customer Barcode.
-	When you set this barcode format, the library will automatically add LM_STATISTICS_POSTAL_CODE to LocalizationModes if you doesn't set it.*/
+	/**Royal Mail 4-State Customer Barcode.*/
 	BF2_RM4SCC = 0x01000000,
 
-	/**DotCode. When you set this barcode format, the library will automatically add LM_STATISTICS_MARKS to LocalizationModes if you doesn't set it.*/
+	/**DotCode.*/
 	BF2_DOTCODE = 0x02
 }BarcodeFormat_2;
+
+
+/**
+* @enum ColourConversionMode
+*
+* Describes the colour conversion mode.
+*/
+typedef enum ColourConversionMode
+{
+	/**Converts a colour image to a grayscale image using the general algorithm. Check @ref CICM for available argument settings. */
+	CICM_GENERAL = 0x01,
+
+	/**Reserved setting for colour conversion mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	CICM_REV = 0x80000000,
+#else
+	CICM_REV = -2147483648,
+#endif
+
+	/**Skips the colour conversion. */
+	CICM_SKIP = 0x00
+
+}ColourConversionMode;
+
+/**
+* @enum TextureDetectionMode
+*
+* Describes the texture detection mode.
+*/
+typedef enum TextureDetectionMode
+{
+	/**Not supported yet. */
+	TDM_AUTO = 0X01,
+
+	/**Detects texture using the general algorithm. Check @ref TDM for available argument settings.*/
+	TDM_GENERAL_WIDTH_CONCENTRATION = 0X02,
+
+	/**Reserved setting for texture detection mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	TDM_REV = 0x80000000,
+#else
+	TDM_REV = -2147483648,
+#endif
+
+	/**Skips texture detection. */
+	TDM_SKIP = 0x00
+
+}TextureDetectionMode;
+
+/**
+* @enum GrayscaleTransformationMode
+*
+* Describes the grayscale transformation mode.
+*/
+typedef enum GrayscaleTransformationMode
+{
+	/**Transforms to inverted grayscale. Recommended for light on dark images. */
+	GTM_INVERTED = 0x01,
+
+	/**Keeps the original grayscale. Recommended for dark on light images. */
+	GTM_ORIGINAL = 0x02,
+
+	/**Reserved setting for grayscale transformation mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	GTM_REV = 0x80000000,
+#else
+	GTM_REV = -2147483648,
+#endif
+
+	/**Skips grayscale transformation. */
+	GTM_SKIP = 0x00
+
+}GrayscaleTransformationMode;
+
+/**
+* @enum PDFReadingMode
+*
+* Describes the PDF reading mode.
+*/
+typedef enum PDFReadingMode
+{
+	/** Lets the library choose the reading mode automatically. */
+	PDFRM_AUTO = 0x01,
+
+	/** Detects barcode from vector data in PDF file.*/
+	PDFRM_VECTOR = 0x02,
+
+	/** Converts the PDF file to image(s) first, then perform barcode recognition.*/
+	PDFRM_RASTER = 0x04,
+
+	/**Reserved setting for PDF reading mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	PDFRM_REV = 0x80000000,
+#else
+	PDFRM_REV = -2147483648,
+#endif
+}PDFReadingMode;
+
+#pragma pack(push)
+#pragma pack(1)
+
+typedef DBRPoint DM_Point;
+
+/**
+* @defgroup Quadrilateral Quadrilateral
+* @{
+*/
+/**
+* Stores the quadrilateral.
+*
+*/
+typedef struct tagQuadrilateral
+{
+
+	/**Four vertexes in a clockwise direction of a quadrilateral. Index 0 represents the left-most vertex. */
+	DBRPoint points[4];
+
+}Quadrilateral;
+
+/**
+* @} defgroup Quadrilateral
+*/
+
+/**
+* @defgroup ImageData ImageData
+* @{
+*/
+/**
+* Stores the image data.
+*
+*/
+typedef struct tagImageData
+{
+	/**The length of the image data byte array */
+	int bytesLength;
+
+	/**The image data content in a byte array */
+	unsigned char* bytes;
+
+	/**The width of the image in pixels */
+	int width;
+
+	/**The height of the image in pixels */
+	int height;
+
+	/**The stride (or scan width) of the image */
+	int stride;
+
+	/**The image pixel format used in the image byte array */
+	ImagePixelFormat format;
+}ImageData;
+
+/**
+* @} defgroup ImageData
+*/
+
+#pragma pack(pop)
+#endif
+
+/**
+* @enum ImagePreprocessingMode
+*
+* Describes the image preprocessing mode.
+*/
+typedef enum ImagePreprocessingMode
+{
+	/**Not supported yet. */
+	IPM_AUTO = 0x01,
+
+	/**Takes the unpreprocessed image for following operations. */
+	IPM_GENERAL = 0x02,
+
+	/**Preprocesses the image using the gray equalization algorithm. Check @ref IPM for available argument settings.*/
+	IPM_GRAY_EQUALIZE = 0x04,
+
+	/**Preprocesses the image using the gray smoothing algorithm. Check @ref IPM for available argument settings.*/
+	IPM_GRAY_SMOOTH = 0x08,
+
+	/**Preprocesses the image using the sharpening and smoothing algorithm. Check @ref IPM for available argument settings.*/
+	IPM_SHARPEN_SMOOTH = 0x10,
+
+	/**Preprocesses the image using the morphology algorithm. Check @ref IPM for available argument settings.*/
+	IPM_MORPHOLOGY = 0x20,
+
+	/**Reserved setting for image preprocessing mode.*/
+#if defined(_WIN32) || defined(_WIN64)
+	IPM_REV = 0x80000000,
+#else
+	IPM_REV = -2147483648,
+#endif
+
+	/**Skips image preprocessing. */
+	IPM_SKIP = 0x00
+
+}ImagePreprocessingMode;
 
 /**
 * @enum BarcodeComplementMode
@@ -599,28 +804,6 @@ typedef enum ColourClusteringMode
 	CCM_SKIP = 0x00
 
 }ColourClusteringMode;
-
-/**
-* @enum ColourConversionMode
-*
-* Describes the colour conversion mode.
-*/
-typedef enum ColourConversionMode
-{
-	/**Converts a colour image to a grayscale image using the general algorithm. Check @ref CICM for available argument settings. */
-	CICM_GENERAL = 0x01,
-
-	/**Reserved setting for colour conversion mode.*/
-#if defined(_WIN32) || defined(_WIN64)
-	CICM_REV = 0x80000000,
-#else
-	CICM_REV = -2147483648,
-#endif
-
-	/**Skips the colour conversion. */
-	CICM_SKIP = 0x00
-
-}ColourConversionMode;
 
 /**
 * @enum DPMCodeReadingMode
@@ -760,6 +943,18 @@ typedef enum LocalizationMode
 	LM_SKIP = 0x00
 
 }LocalizationMode;
+
+/**
+* @enum MirrorMode
+*
+* Describes the mirror mode.
+*/
+typedef enum MirrorMode
+{
+	MM_NORMAL = 0x01,
+	MM_MIRROR = 0x02,
+	MM_BOTH = 0x04
+}MirrorMode;
 
 /**
 * @enum QRCodeErrorCorrectionLevel
@@ -958,55 +1153,6 @@ typedef enum TextResultOrderMode
 
 }TextResultOrderMode;
 
-/**
-* @enum TextureDetectionMode
-*
-* Describes the texture detection mode.
-*/
-typedef enum TextureDetectionMode
-{
-	/**Not supported yet. */
-	TDM_AUTO = 0X01,
-
-	/**Detects texture using the general algorithm. Check @ref TDM for available argument settings.*/
-	TDM_GENERAL_WIDTH_CONCENTRATION = 0X02,
-
-	/**Reserved setting for texture detection mode.*/
-#if defined(_WIN32) || defined(_WIN64)
-	TDM_REV = 0x80000000,
-#else
-	TDM_REV = -2147483648,
-#endif
-
-	/**Skips texture detection. */
-	TDM_SKIP = 0x00
-
-}TextureDetectionMode;
-
-/**
-* @enum GrayscaleTransformationMode
-*
-* Describes the grayscale transformation mode.
-*/
-typedef enum GrayscaleTransformationMode
-{
-	/**Transforms to inverted grayscale. Recommended for light on dark images. */
-	GTM_INVERTED = 0x01,
-
-	/**Keeps the original grayscale. Recommended for dark on light images. */
-	GTM_ORIGINAL = 0x02,
-
-	/**Reserved setting for grayscale transformation mode.*/
-#if defined(_WIN32) || defined(_WIN64)
-	GTM_REV = 0x80000000,
-#else
-	GTM_REV = -2147483648,
-#endif
-
-	/**Skips grayscale transformation. */
-	GTM_SKIP = 0x00
-
-}GrayscaleTransformationMode;
 
 /**
 * @enum ResultCoordinateType
@@ -1054,34 +1200,6 @@ typedef enum IMResultDataType
 }IMResultDataType;
 
 /**
-* @enum ScaleUpMode
-*
-* Describes the scale up mode .
-*/
-typedef enum ScaleUpMode
-{
-	/**The library chooses an interpolation method automatically to scale up.*/
-	SUM_AUTO = 0x01,
-
-	/**Scales up using the linear interpolation method. Check @ref SUM for available argument settings.*/
-	SUM_LINEAR_INTERPOLATION = 0x02,
-
-	/**Scales up using the nearest-neighbour interpolation method. Check @ref SUM for available argument settings.*/
-	SUM_NEAREST_NEIGHBOUR_INTERPOLATION = 0x04,
-
-	/**Reserved setting for scale up mode.*/
-#if defined(_WIN32) || defined(_WIN64)
-	SUM_REV = 0x80000000,
-#else
-	SUM_REV = -2147483648,
-#endif
-
-	/**Skip the scale-up process.*/
-	SUM_SKIP = 0x00
-
-}ScaleUpMode;
-
-/**
 * @enum AccompanyingTextRecognitionMode
 *
 * Describes the accompanying text recognition mode.
@@ -1125,29 +1243,6 @@ typedef enum ClarityFilterMode
 	CFM_GENERAL = 0x01
 }ClarityFilterMode;
 
-/**
-* @enum PDFReadingMode
-*
-* Describes the PDF reading mode.
-*/
-typedef enum PDFReadingMode
-{
-	/** Lets the library choose the reading mode automatically. */
-	PDFRM_AUTO = 0x01,
-
-	/** Detects barcode from vector data in PDF file.*/
-	PDFRM_VECTOR = 0x02,
-
-	/** Converts the PDF file to image(s) first, then perform barcode recognition.*/
-	PDFRM_RASTER = 0x04,
-
-	/**Reserved setting for PDF reading mode.*/
-#if defined(_WIN32) || defined(_WIN64)
-	PDFRM_REV = 0x80000000,
-#else
-	PDFRM_REV = -2147483648,
-#endif
-}PDFReadingMode;
 
 /**
 * @enum DeblurMode
@@ -1176,6 +1271,12 @@ typedef enum DeblurMode
 
 	/**Performs deblur process using the sharpening algorithm.*/
 	DM_SHARPENING = 0x40,
+
+	/**Performs deblur process based on the binary image from the localization process.*/
+	DM_BASED_ON_LOC_BIN = 0x80,
+
+	/**Performs deblur process using the sharpening and smoothing algorithm.*/
+	DM_SHARPENING_SMOOTHING = 0x100,
 
 	/**Reserved setting for deblur mode.*/
 #if defined(_WIN32) || defined(_WIN64)
@@ -2096,9 +2197,12 @@ typedef struct tagTextResult
 	
 	/**DPM mark */
 	int isDPM;
+
+	/**Mirror flag*/
+	int isMirrored;
 	
 	/**Reserved memory for the struct. The length of this array indicates the size of the memory reserved for this struct. */
-	char reserved[48];
+	char reserved[44];
 }TextResult, *PTextResult;
 
 /**
@@ -2458,26 +2562,6 @@ typedef struct tagIntermediateResultArray
 * @} defgroup IntermediateResultArray
 */
 
-/**
-* @defgroup DBRPoint DBRPoint
-* @{
-*/
-/**
-* Stores an x- and y-coordinate pair in two-dimensional space.
-*
-*/
-typedef struct tagDBRPoint
-{
-	/**The X coordinate of the point */
-	int x;
-
-	/**The Y coordinate of the point */
-	int y;
-}DBRPoint, *PDBRPoint;
-
-/**
-* @} defgroup DBRPoint
-*/
 
 /**
 * @defgroup RegionOfInterest RegionOfInterest
@@ -2506,25 +2590,6 @@ typedef struct tagRegionOfInterest
 * @} defgroup RegionOfInterest
 */
 
-/**
-* @defgroup Quadrilateral Quadrilateral
-* @{
-*/
-/**
-* Stores the quadrilateral.
-*
-*/
-typedef struct tagQuadrilateral
-{
-
-	/**Four vertexes in a clockwise direction of a quadrilateral. Index 0 represents the left-most vertex. */
-	DBRPoint points[4];
-
-}Quadrilateral;
-
-/**
-* @} defgroup RegionOfInterest
-*/
 
 /**
 * @defgroup Contour Contour
@@ -2547,38 +2612,6 @@ typedef struct tagContour
 * @} defgroup Contour
 */
 
-/**
-* @defgroup ImageData ImageData
-* @{
-*/
-/**
-* Stores the image data.
-*
-*/
-typedef struct tagImageData
-{
-	/**The length of the image data byte array */
-	int bytesLength;
-
-	/**The image data content in a byte array */
-	unsigned char* bytes;
-
-	/**The width of the image in pixels */
-	int width;
-
-	/**The height of the image in pixels */
-	int height;
-
-	/**The stride (or scan width) of the image */
-	int stride;
-
-	/**The image pixel format used in the image byte array */
-	ImagePixelFormat format;
-}ImageData;
-
-/**
-* @} defgroup ImageData
-*/
 
 /**
 * @defgroup LineSegment LineSegment
@@ -2610,7 +2643,8 @@ typedef struct tagLineSegment
  * @}defgroup LineSegment
  */
 
-typedef struct tagDM_LTSConnectionParameters DM_LTSConnectionParameters;
+typedef struct tagDM_DLSConnectionParameters DM_DLSConnectionParameters;
+typedef struct tagDM_DLSConnectionParameters DM_LTSConnectionParameters;
 
 /**
  * @}defgroup Struct Struct
@@ -2773,7 +2807,7 @@ extern "C" {
 	DBR_API void DBR_DestroyInstance(void* barcodeReader);
 
 	/**
-	* Initializes a DM_LTSConnectionParameters struct with default values.
+	* Initializes a DM_LTSConnectionParameters struct with default values. Deprecated, use DBR_InitDLSConnectionParameters instead.
 	*
 	* @param [in, out] pLTSConnectionParameters The struct of DM_LTSConnectionParameters.
 	*
@@ -2786,9 +2820,30 @@ extern "C" {
 	DBR_API int DBR_InitLTSConnectionParameters(DM_LTSConnectionParameters *pLTSConnectionParameters);
 
 	/**
-	* Initializes the barcode reader license and connects to the specified server for online verification.
+	* Initializes a DM_DLSConnectionParameters struct with default values.
 	*
-	* @param [in] pLTSConnectionParameters The struct DMLTSConnectionParameters with customized settings.
+	* @param [in, out] pDLSConnectionParameters The struct of DM_DLSConnectionParameters.
+	*
+	* @return Returns error code. Returns 0 if the function operates successfully. You can call
+	* 		  DBR_GetErrorString() to get detailed error message. Possible returns are:
+	*		  DBR_OK;
+	*		  DBRERR_NULL_POINTER;
+	*
+	*/
+	DBR_API int DBR_InitDLSConnectionParameters(DM_DLSConnectionParameters *pDLSConnectionParameters);
+
+	/**
+	* Get available instances count when charging by concurrent instances count.
+	*
+	* @return Returns available instances count. 
+	*
+	*/
+	DBR_API int DBR_GetIdleInstancesCount();
+
+	/**
+	* Initializes the barcode reader license and connects to the specified server for online verification. Deprecated, use DBR_InitLicenseFromDLS instead.
+	*
+	* @param [in] pLTSConnectionParameters The struct DM_LTSConnectionParameters with customized settings.
 	* @param [in, out] errorMsgBuffer The buffer is allocated by caller and the recommending length is 256. The error message will be copied to the buffer.
 	* @param [in] errorMsgBufferLen The length of allocated buffer.
 	*
@@ -2797,6 +2852,20 @@ extern "C" {
 	*
 	*/
 	DBR_API int DBR_InitLicenseFromLTS(DM_LTSConnectionParameters *pLTSConnectionParameters, char errorMsgBuffer[], const int errorMsgBufferLen);
+
+
+	/**
+	* Initializes the barcode reader license and connects to the specified server for online verification.
+	*
+	* @param [in] pDLSConnectionParameters The struct DM_DLSConnectionParameters with customized settings.
+	* @param [in, out] errorMsgBuffer The buffer is allocated by caller and the recommending length is 256. The error message will be copied to the buffer.
+	* @param [in] errorMsgBufferLen The length of allocated buffer.
+	*
+	* @return Returns error code. Returns 0 if the function operates successfully. You can call
+	* 		  DBR_GetErrorString() to get detailed error message.
+	*
+	*/
+	DBR_API int DBR_InitLicenseFromDLS(DM_DLSConnectionParameters *pDLSConnectionParameters, char errorMsgBuffer[], const int errorMsgBufferLen);
 
 	/**
 	* Init Intermediate Result.
@@ -3928,21 +3997,40 @@ namespace dynamsoft
 			 * @{
 			 */
 
-			 /**
-			 * Initializes a DM_LTSConnectionParameters struct with default values.
-			 *
-			 * @param [in,out] pIntermediateResult The struct of DM_LTSConnectionParameters.
-			 *
-			 * @return Returns error code. Returns 0 if the function operates successfully. You can call
-			 * 		  DBR_GetErrorString() to get detailed error message.
-			 *
-			 */
+			/**
+			* Initializes a DM_LTSConnectionParameters struct with default values. Deprecated, use InitDLSConnectionParameters instead.
+			*
+			* @param [in,out] pLTSConnectionParameters The struct of DM_LTSConnectionParameters.
+			*
+			* @return Returns error code. Returns 0 if the function operates successfully. You can call
+			* 		  DBR_GetErrorString() to get detailed error message.
+			*
+			*/
 			static int InitLTSConnectionParameters(DM_LTSConnectionParameters *pLTSConnectionParameters);
 
 			/**
-			* Initializes the barcode reader license and connects to the specified server for online verification.
+			* Initializes a DM_DLSConnectionParameters struct with default values.
 			*
-			* @param [in] pLTSConnectionParameters The struct DMLTSConnectionParameters with customized settings.
+			* @param [in,out] pDLSConnectionParameters The struct of DM_DLSConnectionParameters.
+			*
+			* @return Returns error code. Returns 0 if the function operates successfully. You can call
+			* 		  DBR_GetErrorString() to get detailed error message.
+			*
+			*/
+			static int InitDLSConnectionParameters(DM_DLSConnectionParameters *pDLSConnectionParameters);
+
+			/**
+			* Get available instances count when charging by concurrent instances count.
+			*
+			* @return Returns available instances count.
+			*
+			*/
+			static int GetIdleInstancesCount();
+
+			/**
+			* Initializes the barcode reader license and connects to the specified server for online verification. Deprecated, use InitLicenseFromDLS instead.
+			*
+			* @param [in] pLTSConnectionParameters The struct DM_LTSConnectionParameters with customized settings.
 			* @param [in, out] errorMsgBuffer (Optional) The buffer is allocated by the caller and the recommended length is 256. The error message will be copied to the buffer.
 			* @param [in] errorMsgBufferLen (Optional) The length of the allocated buffer
 			*
@@ -3951,6 +4039,20 @@ namespace dynamsoft
 			*
 			*/
 			static int InitLicenseFromLTS(DM_LTSConnectionParameters *pLTSConnectionParameters, char errorMsgBuffer[] = NULL, const int errorMsgBufferLen = 0);
+
+
+			/**
+			* Initializes the barcode reader license and connects to the specified server for online verification.
+			*
+			* @param [in] pDLSConnectionParameters The struct DM_DLSConnectionParameters with customized settings.
+			* @param [in, out] errorMsgBuffer (Optional) The buffer is allocated by the caller and the recommended length is 256. The error message will be copied to the buffer.
+			* @param [in] errorMsgBufferLen (Optional) The length of the allocated buffer
+			*
+			* @return Returns error code. Returns 0 if the function operates successfully. You can call
+			* 		  DBR_GetErrorString() to get detailed error message.
+			*
+			*/
+			static int InitLicenseFromDLS(DM_DLSConnectionParameters *pDLSConnectionParameters, char errorMsgBuffer[] = NULL, const int errorMsgBufferLen = 0);
 
 			/**
 			* Init Intermediate Result.

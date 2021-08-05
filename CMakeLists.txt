@@ -6,7 +6,7 @@ option(ARM32_BUILD "Build for ARM32" OFF)
 
 # The version number.
 set(BarcodeReader_VERSION_MAJOR 8)
-set(BarcodeReader_VERSION_MINOR 1)
+set(BarcodeReader_VERSION_MINOR 6)
 
 # Check platforms
 if (CMAKE_HOST_WIN32)
@@ -15,6 +15,25 @@ elseif(CMAKE_HOST_APPLE)
     set(MACOS 1)
 elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
+endif()
+
+# Check compiler architecture
+if(CMAKE_CL_64)
+    MESSAGE( STATUS ">>>>>>>> 64-bit")
+else()
+    MESSAGE( STATUS ">>>>>>>> 32-bit")
+endif()
+
+# Check compilers
+MESSAGE( STATUS ">>>>>>>> ${CMAKE_CXX_COMPILER_ID}")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    MESSAGE( STATUS "Using Clang" )
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    MESSAGE( STATUS "Using GNU" )
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    MESSAGE( STATUS "Using Intel" )
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    MESSAGE( STATUS "Using MSVC" )
 endif()
 
 # Set RPATH
@@ -36,8 +55,11 @@ configure_file (
 # Add search path for include and lib files
 MESSAGE( STATUS "CPU architecture ${CMAKE_SYSTEM_PROCESSOR}" )
 if(WINDOWS)
-    MESSAGE( STATUS "Link directory: ${PROJECT_SOURCE_DIR}/platforms/win/lib/" )
-    link_directories("${PROJECT_SOURCE_DIR}/platforms/win/lib/") 
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        link_directories("${PROJECT_SOURCE_DIR}/platforms/win/bin/") 
+    else()
+        link_directories("${PROJECT_SOURCE_DIR}/platforms/win/lib/") 
+    endif()
 elseif(LINUX)
     if (CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
         MESSAGE( STATUS "Link directory: ${PROJECT_SOURCE_DIR}/platforms/linux/" )
@@ -56,23 +78,26 @@ endif()
 include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/include/")
 
 # Add the executable
-add_executable(BarcodeReader BarcodeReader.cxx)
+add_executable(${PROJECT_NAME} BarcodeReader.cxx)
 if(WINDOWS)
-    if(CMAKE_CL_64)
-        target_link_libraries (BarcodeReader "DBRx64")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_libraries (${PROJECT_NAME} "DynamsoftBarcodeReaderx64")
     else()
-        target_link_libraries (BarcodeReader "DBRx86")
+        if(CMAKE_CL_64)
+            target_link_libraries (${PROJECT_NAME} "DBRx64")
+        else()
+            target_link_libraries (${PROJECT_NAME} "DBRx86")
+        endif()
     endif()
 else()
-    target_link_libraries (BarcodeReader "DynamsoftBarcodeReader" pthread)
+    target_link_libraries (${PROJECT_NAME} "DynamsoftBarcodeReader" pthread)
 endif()
 
 if(WINDOWS)
-    add_custom_command(TARGET BarcodeReader POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/platforms/win/bin/"      
-        $<TARGET_FILE_DIR:BarcodeReader>)
-
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/platforms/win/bin/"      
+    $<TARGET_FILE_DIR:BarcodeReader>)
 endif()
 
 # Set installation directory
@@ -91,10 +116,10 @@ elseif(MACOS)
     install (DIRECTORY  "${PROJECT_SOURCE_DIR}/platforms/macos/" DESTINATION lib)
 endif()
 
-install (TARGETS BarcodeReader DESTINATION bin)
+install (TARGETS ${PROJECT_NAME} DESTINATION bin)
 install (FILES "${PROJECT_BINARY_DIR}/BarcodeReaderConfig.h" DESTINATION include)
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/include/" DESTINATION include)
 
 # Use CTest
 include(CTest)
-add_test (BarcodeReaderRuns BarcodeReader)
+add_test (BarcodeReaderRuns ${PROJECT_NAME})
