@@ -17,7 +17,7 @@
 Set the license key in `BarcodeReader.cxx`:
 
 ```cpp
-reader.InitLicense("LICENSE-KEY");
+DBR_InitLicense(reader, "LICENSE-KEY");
 ```
 
 ## Contact Us
@@ -39,6 +39,12 @@ reader.InitLicense("LICENSE-KEY");
     cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..
     
     cmake --build . --config release
+    ```
+
+    For `MinGW`:
+    
+    ```bash
+    cmake -G "MinGW Makefiles" ..
     ```
 3. Run the app:
     ```
