@@ -1,1 +1,0 @@
-Get [Dynamsoft Barcode Reader SDK for macOS](https://www.dynamsoft.com/Downloads/Dynamic-Barcode-Reader-Download.aspx).

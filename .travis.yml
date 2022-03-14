@@ -24,7 +24,7 @@ jobs:
 
 branches:
   only:
-    - master
+    - main
 
 script:
     - mkdir build

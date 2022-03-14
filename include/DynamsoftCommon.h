@@ -61,7 +61,9 @@ typedef enum DM_DeploymentType
 	DM_DT_EMBEDDED_DEVICE = 6,
 
 	/**OEM deployment type*/
-	DM_DT_OEM = 7
+	DM_DT_OEM = 7,
+	/**Mobile deployment type*/
+	DM_DT_MOBILE = 9
 }DM_DeploymentType;
 
 /**

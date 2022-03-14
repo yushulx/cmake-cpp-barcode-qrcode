@@ -1,11 +1,12 @@
 # Building C/C++ Barcode Reader with CMake
 
 [![release](https://img.shields.io/github/release/Dynamsoft/cmake.svg)](https://github.com/Dynamsoft/cmake/releases/latest)
-[![Travis CI status](https://img.shields.io/travis/dynamsoft/cmake/master?label=Travis%20CI&logo=travis)](https://travis-ci.com/github/Dynamsoft/cmake)
 
-## What You Should Know
-- [![](https://img.shields.io/badge/Download-Offline%20SDK-orange)](https://www.dynamsoft.com/barcode-reader/downloads) 
-- [![](https://img.shields.io/badge/Get-30--day%20FREE%20Trial%20License-blue)](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr)
+## SDK Version
+[v9.0](https://www.dynamsoft.com/barcode-reader/downloads)
+
+## SDK Activation
+Click [here](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr) to get a trial license.
 
 ## Supported Platforms
 - Windows x86/x64
@@ -17,12 +18,8 @@
 Set the license key in `BarcodeReader.cxx`:
 
 ```cpp
-DBR_InitLicense(reader, "LICENSE-KEY");
+DBR_InitLicense(license, errorMsgBuffer, 512);
 ```
-
-## Contact Us
-- support@dynamsoft.com
-- https://www.dynamsoft.com/Company/Contact.aspx
 
 ## Windows
 1. Create a **build** folder:
@@ -48,7 +45,7 @@ DBR_InitLicense(reader, "LICENSE-KEY");
     ```
 3. Run the app:
     ```
-    Release\BarcodeReader [image-file] [optional: license-file] [optional: template-file]
+    .\Release\BarcodeReader.exe [image-file] [optional: license-file] [optional: template-file]
     ```
 
 ## Linux and Raspberry Pi OS

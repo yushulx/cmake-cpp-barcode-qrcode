@@ -202,6 +202,8 @@ typedef void* HANDLE;
 /**The DotCode license is invalid. */
 #define DBRERR_DOTCODE_LICENSE_INVALID -10061
 
+#define DBRERR_PHARMACODE_LICENSE_INVALID -10062
+
 /**
  * @}defgroup ErrorCode
  */
@@ -382,13 +384,13 @@ typedef enum BarcodeFormat
 {
 	/**All supported formats in BarcodeFormat group 1*/
 #if defined(_WIN32) || defined(_WIN64)
-	BF_ALL = 0xFE1FFFFF,
+	BF_ALL = 0xFE3FFFFF,
 #else
-	BF_ALL = -31457281,
+	BF_ALL = -29360129,
 #endif
 
 	/**Combined value of BF_CODABAR, BF_CODE_128, BF_CODE_39, BF_CODE_39_Extended, BF_CODE_93, BF_EAN_13, BF_EAN_8, INDUSTRIAL_25, BF_ITF, BF_UPC_A, BF_UPC_E, BF_MSI_CODE;  */
-	BF_ONED = 0x001007FF,
+	BF_ONED = 0x003007FF,
 
 	/**Combined value of BF_GS1_DATABAR_OMNIDIRECTIONAL, BF_GS1_DATABAR_TRUNCATED, BF_GS1_DATABAR_STACKED, BF_GS1_DATABAR_STACKED_OMNIDIRECTIONAL, BF_GS1_DATABAR_EXPANDED, BF_GS1_DATABAR_EXPANDED_STACKED, BF_GS1_DATABAR_LIMITED*/
 	BF_GS1_DATABAR = 0x0003F800,
@@ -481,6 +483,9 @@ typedef enum BarcodeFormat
 	/**MSI Code*/
 	BF_MSI_CODE = 0x100000,
 
+	/*Code 11*/
+	BF_CODE_11 = 0x200000,
+
 	/**No barcode format in BarcodeFormat group 1*/
 	BF_NULL = 0x00
 
@@ -519,7 +524,16 @@ typedef enum BarcodeFormat_2
 	BF2_RM4SCC = 0x01000000,
 
 	/**DotCode.*/
-	BF2_DOTCODE = 0x02
+	BF2_DOTCODE = 0x02,
+
+	/**_PHARMACODE_ONE_TRACK.*/
+	BF2_PHARMACODE_ONE_TRACK = 0x04,
+
+	/**PHARMACODE_TWO_TRACK.*/
+	BF2_PHARMACODE_TWO_TRACK = 0x08,
+
+	/**PHARMACODE.*/
+	BF2_PHARMACODE = 0x0C
 }BarcodeFormat_2;
 
 
@@ -932,6 +946,9 @@ typedef enum LocalizationMode
 	/**Localizes barcodes from the centre of the image. Check @ref LM for available argument settings. */
 	LM_CENTRE = 0x80,
 
+	/**Localizes 1D barcodes fast. Check @ref LM for available argument settings. */
+	LM_ONED_FAST_SCAN = 0x100,
+
 	/**Reserved setting for localization mode.*/
 #if defined(_WIN32) || defined(_WIN64)
 	LM_REV = 0x80000000,
@@ -990,6 +1007,12 @@ typedef enum DeformationResistingMode
 
 	/**Resists deformation using the general algorithm. Check @ref DRM for available argument settings.*/
 	DRM_GENERAL = 0x02,
+	/**Resists deformation when the barcode is warped gently.*/
+	DRM_BROAD_WARP = 0x04,
+	/**Resists deformation for barcodes with minor deformation in local modules.*/
+	DRM_LOCAL_REFERENCE = 0x08,
+	/**Resists deformation for barcodes on a wrinkled surface.*/
+	DRM_DEWRINKLE = 0x10,
 
 	/**Reserved setting for deformation resisting mode.*/
 #if defined(_WIN32) || defined(_WIN64)
@@ -1288,6 +1311,12 @@ typedef enum DeblurMode
 	/**Skips the deblur process.*/
 	DM_SKIP = 0x00
 }DeblurMode;
+
+typedef enum PartitionMode
+{
+	PM_WHOLE_BARCODE = 0x01,
+	PM_ALIGNMENT_PARTITION = 0x02
+}PartitionMode;
 
 /**
 * @} defgroup Enum Enumerations
@@ -2742,14 +2771,6 @@ extern "C" {
 	 *
 	 * @return The error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			int errorCode = DBR_DecodeFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-			const char* errorString = DBR_GetErrorString(errorCode);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API const char* DBR_GetErrorString(int errorCode);
 
@@ -2758,10 +2779,6 @@ extern "C" {
 	 *
 	 * @return The version info string.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			const char* versionInfo = DBR_GetVersion();
-	 * @endcode
 	 */
 	DBR_API const char* DBR_GetVersion();
 
@@ -2783,12 +2800,6 @@ extern "C" {
 	  * @par Remarks:
 	  *		Partial of the decoding result will be masked with "*" without a valid license key.
 	  *
-	  * @par Code Snippet:
-	  * @code
-			 void* barcodeReader = DBR_CreateInstance();
-			 DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			 DBR_DestroyInstance(barcodeReader);
-	  * @endcode
 	  */
 	DBR_API void* DBR_CreateInstance();
 
@@ -2797,12 +2808,6 @@ extern "C" {
 	 *
 	 * @param [in] barcodeReader Handle of the barcode reader instance.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API void DBR_DestroyInstance(void* barcodeReader);
 
@@ -2882,20 +2887,15 @@ extern "C" {
 	/**
 	 * Reads product key and activates the SDK.
 	 *
-	 * @param [in] barcodeReader Handle of the barcode reader instance.
 	 * @param [in] pLicense The product keys.
+	 * @param [in, out] errorMsgBuffer The buffer is allocated by caller and the recommending length is 256. The error message will be copied to the buffer.
+	 * @param [in] errorMsgBufferLen The length of allocated buffer.
 	 *
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
-	DBR_API int  DBR_InitLicense(void* barcodeReader, const char* pLicense);
+	DBR_API int  DBR_InitLicense(const char* pLicense, char errorMsgBuffer[], const int errorMsgBufferLen);
 
 	/**
 	 * Initializes barcode reader license and connects to the specified server for online verification.
@@ -2978,14 +2978,6 @@ extern "C" {
 	  *
 	  * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	  * 		   DBR_GetErrorString() to get detailed error message.
-	  *
-	  * @par Code Snippet:
-	  * @code
-			 void* barcodeReader = DBR_CreateInstance();
-			 DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			 int errorCode = DBR_DecodeFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-			 DBR_DestroyInstance(barcodeReader);
-	  * @endcode
 	  */
 	DBR_API int  DBR_DecodeFile(void* barcodeReader, const char* pFileName, const char* pTemplateName);
 
@@ -3000,17 +2992,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			unsigned char* pFileBytes;
-			int nFileSize = 0;
-			GetFileStream("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pFileBytes, &nFileSize);
-			int errorCode = DBR_DecodeFileInMemory(barcodeReader, pFileBytes, nFileSize, "");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API int  DBR_DecodeFileInMemory(void* barcodeReader, const unsigned char* pFileBytes, const int fileSize, const char* pTemplateName);
 
@@ -3028,19 +3009,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			unsigned char* pBufferBytes;
-			int iWidth = 0;
-			int iHeight = 0;
-			int iStride = 0;
-			ImagePixelFormat format;
-			GetBufferFromFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pBufferBytes, &iWidth, &iHeight, &iStride, &format);
-			int errorCode = DBR_DecodeBuffer(barcodeReader, pBufferBytes, iWidth, iHeight, iStride, format, "");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API int  DBR_DecodeBuffer(void* barcodeReader, const unsigned char* pBufferBytes, const int width, const int height, const int stride, const ImagePixelFormat format, const char* pTemplateName);
 
@@ -3054,18 +3022,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			unsigned char* pBufferBytes;
-			int nFileSize = 0;
-			GetFileStream("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pFileBytes, &nFileSize);
-			char* strBase64String;
-			GetFileBase64String(pBufferBytes, &strBase64String);
-			int errorCode = DBR_DecodeBase64String(barcodeReader, strBase64String, "");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API int  DBR_DecodeBase64String(void* barcodeReader, const char* pBase64String, const char* pTemplateName);
 
@@ -3079,15 +3035,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			HANDLE pDIB;
-			GetDIBFromImage("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pDIB);
-			int errorCode = DBR_DecodeDIB(barcodeReader, pDIB, "");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API int DBR_DecodeDIB(void* barcodeReader, const HANDLE hDIB, const char* pTemplateName);
 
@@ -3137,14 +3084,6 @@ extern "C" {
 	 * 		   DBRERR_PARAMETER_VALUE_INVALID;
 	 * 		   DBRERR_NULL_POINTER;
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			int errorCode = DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
-	 *
 	 */
 	DBR_API int DBR_StartFrameDecoding(void *barcodeReader, const int maxQueueLength, const int maxResultQueueLength, const int width, const int height, const int stride, const ImagePixelFormat format, const char *pTemplateName);
 
@@ -3162,32 +3101,6 @@ extern "C" {
 	* 		   DBRERR_PARAMETER_VALUE_INVALID;
 	* 		   DBRERR_NULL_POINTER;
 	*
-	* @par Code Snippet:
-	* @code
-	*		void* barcodeReader = DBR_CreateInstance();
-	*		DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-	*		FrameDecodingParameters parameters;
-	*		int errorCode = DBR_InitFrameDecodingParameters(barcodeReader, &parameters);
-	*		if(errorCode == DBR_OK)
-	*		{
-	*			parameters.maxQueueLength = 3;
-	*			parameters.maxResultQueueLength = 10;
-	*			parameters.width = 1024;
-	*			parameters.height = 720;
-	*			parameters.stride = 1024;
-	*			parameters.imagePixelFormat = IPF_GRAYSCALED;
-	*			parameters.region.regionMeasuredByPercentage = 1;
-	*			parameters.region.regionTop = 0;
-	*			parameters.region.regionBottom = 100;
-	*			parameters.region.regionLeft = 0;
-	*			parameters.region.regionRight = 100;
-	*			parameters.threshold = 0.01;
-	*			parameters.fps = 0;
-	*			int errorCode = DBR_StartFrameDecodingEx(barcodeReader, parameters, "");
-	*			DBR_DestroyInstance(barcodeReader);
-	*		}
-	* @endcode
-	*
 	*/
 	DBR_API int DBR_StartFrameDecodingEx(void *barcodeReader, FrameDecodingParameters parameters, const char* pTemplateName);
 
@@ -3199,14 +3112,6 @@ extern "C" {
 	 *
 	 * @return Returns the ID of the appended frame.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			int frameId = DBR_AppendFrame(barcodeReader, pBufferBytes);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
-	 *
 	 */
 	DBR_API int DBR_AppendFrame(void *barcodeReader, unsigned char *pBufferBytes);
 
@@ -3216,15 +3121,6 @@ extern "C" {
 	 * @param [in] barcodeReader Handle of the barcode reader instance.
 	 *
 	 * @return Returns the length of the inner frame queue.
-	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			int frameLength = DBR_GetLengthOfFrameQueue(barcodeReader);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
-	 *
 	 */
 	DBR_API int DBR_GetLengthOfFrameQueue(void *barcodeReader);
 
@@ -3237,14 +3133,6 @@ extern "C" {
 	 * 		   DBR_GetErrorString() to get detailed error message. Possible returns are:
 	 * 		   DBR_OK;
 	 * 		   DBRERR_STOP_DECODING_THREAD_FAILED;
-	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			int errorCode = DBR_StopFrameDecoding(barcodeReader);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 *
 	 */
 	DBR_API int DBR_StopFrameDecoding(void *barcodeReader);
@@ -3274,18 +3162,6 @@ extern "C" {
 	  * 		   DBR_GetErrorString() to get detailed error message. Possible returns are:
 	  * 		   DBR_OK;
 	  * 		   DBRERR_SET_MODE_ARGUMENT_ERROR;
-	  * @par Code Snippet:
-	  * @code
-			 void* barcodeReader = DBR_CreateInstance();
-			 DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			 PublicRuntimeSettings settings;
-			 DBR_GetRuntimeSettings(barcodeReader, &settings);
-			 settings.binarizationModes[0] = BM_LOCAL_BLOCK;
-			 char errorMessage[256];
-			 DBR_UpdateRuntimeSettings(barcodeReader, &settings, errorMessage, 256);
-			 DBR_SetModeArgument(barcodeReader, "BinarizationModes", 0, "EnableFillBinaryVacancy", "1", errorMessage, 256);
-			 DBR_DestroyInstance(barcodeReader);
-	  * @endcode
 	  *
 	  * @par Remarks:
 	  *		Check @ref ModesArgument for available argument settings
@@ -3309,20 +3185,6 @@ extern "C" {
 	* 		   DBR_GetErrorString to get detail message. Possible returns are:
 	* 		   DBR_OK;
 	* 		   DBRERR_GET_MODE_ARGUMENT_ERROR;
-	* @par Code Snippet:
-	* @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			PublicRuntimeSettings settings;
-			DBR_GetRuntimeSettings(barcodeReader, &settings);
-			settings.binarizationModes[0] = BM_LOCAL_BLOCK;
-			char errorMessage[256];
-			char argumentValue[480];
-			DBR_UpdateRuntimeSettings(barcodeReader, &settings, errorMessage, 256);
-			DBR_SetModeArgument(barcodeReader, "BinarizationModes", 0, "EnableFillBinaryVacancy", "1", errorMessage, 256);
-			DBR_GetModeArgument(barcodeReader, "BinarizationModes", 0, "EnableFillBinaryVacancy", argumentValue, 480, errorMessage, 256);
-			DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	* @par Remarks:
 	*		Check @ref ModesArgument for available argument settings
@@ -3338,14 +3200,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			PublicRuntimeSettings settings;
-			int errorCode = DBR_GetRuntimeSettings(barcodeReader, &settings);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API int DBR_GetRuntimeSettings(void* barcodeReader, PublicRuntimeSettings *pSettings);
 
@@ -3361,17 +3215,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 *		  DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			PublicRuntimeSettings settings;
-			int errorCode = DBR_GetRuntimeSettings(barcodeReader, &settings);
-			settings.deblurLevel = 9;
-			char errorMessage[256];
-			DBR_UpdateRuntimeSettings(barcodeReader, &settings, errorMessage, 256);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API int DBR_UpdateRuntimeSettings(void* barcodeReader, PublicRuntimeSettings *pSettings, char errorMsgBuffer[], const int errorMsgBufferLen);
 
@@ -3383,17 +3226,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			PublicRuntimeSettings settings;
-			int errorCode = DBR_GetRuntimeSettings(barcodeReader, &settings);
-			settings.deblurLevel = 9;
-			DBR_UpdateRuntimeSettings(barcodeReader, &settings);
-			DBR_ResetRuntimeSettings(barcodeReader);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API int DBR_ResetRuntimeSettings(void* barcodeReader);
 
@@ -3420,14 +3252,6 @@ extern "C" {
 	* @return Returns error code. Returns 0 if the function operates successfully. You can call
 	* 		  DBR_GetErrorString() to get detailed error message.
 	*
-	* @par Code Snippet:
-	* @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessage[256];
-			DBR_InitRuntimeSettingsWithFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessage, 256);
-			DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	* @sa CFunctions PublicRuntimeSettings
 	*/
@@ -3447,14 +3271,6 @@ extern "C" {
 	* @return Returns error code. Returns 0 if the function operates successfully. YOu can call
 	* 		  DBR_GetErrorString() to get detailed error message.
 	*
-	* @par Code Snippet:
-	* @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessage[256];
-			DBR_InitRuntimeSettingsWithString(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_OVERWRITE, errorMessage, 256);
-			DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	* @sa CFunctions PublicRuntimeSettings
 	*/
@@ -3474,14 +3290,6 @@ extern "C" {
 	* @return Returns error code. Returns 0 if the function operates successfully. You can call
 	* 		  DBR_GetErrorString() to get detailed error message.
 	*
-	* @par Code Snippet:
-	* @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessage[256];
-			DBR_AppendTplFileToRuntimeSettings(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_IGNORE, errorMessage, 256);
-			DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	* @sa CFunctions PublicRuntimeSettings
 	*/
@@ -3501,14 +3309,6 @@ extern "C" {
 	* @return Returns error code. Returns 0 if the function operates successfully. You can call
 	* 		  DBR_GetErrorString() to get detailed error message.
 	*
-	* @par Code Snippet:
-	* @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessage[256];
-			DBR_AppendTplStringToRuntimeSettings(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessage, 256);
-			DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	* @sa CFunctions PublicRuntimeSettings
 	*/
@@ -3521,17 +3321,6 @@ extern "C" {
 	*
 	* @return Returns the count of parameter templates. Returns -1 if DBRERR_NULL_POINTER happens.
 	*
-	* @par Code Snippet:
-	* @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessageInit[256];
-			char errorMessageAppend[256];
-			DBR_InitRuntimeSettingsWithFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-			DBR_AppendTplStringToRuntimeSettings(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-			int currentTemplateCount = DBR_GetParameterTemplateCount(barcodeReader);
-			DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	*/
 	DBR_API int  DBR_GetParameterTemplateCount(void* barcodeReader);
@@ -3548,21 +3337,6 @@ extern "C" {
 	* @return Returns error code. Returns 0 if the function operates successfully. You can call
 	* 		  DBR_GetErrorString() to get detailed error message.
 	*
-	* @par Code Snippet:
-	* @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessageInit[256];
-			char errorMessageAppend[256];
-			DBR_InitRuntimeSettingsWithFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-			DBR_AppendTplStringToRuntimeSettings(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-			int currentTemplateCount = DBR_GetParameterTemplateCount(barcodeReader);
-			int templateIndex = 1;
-			// notice that the value of 'templateIndex' should less than currentTemplateCount.
-			char templateName[256];
-			DBR_GetParameterTemplateName(barcodeReader, templateIndex, templateName, 256);
-			DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	*/
 	DBR_API int  DBR_GetParameterTemplateName(void* barcodeReader, const int index, char nameBuffer[], const int nameBufferLen);
@@ -3578,18 +3352,6 @@ extern "C" {
 	* @return Returns error code. Returns 0 if the function operates successfully. You can call
 	* 		   DBR_GetErrorString() to get detailed error message.
 	*
-	* @par Code Snippet:
-	* @code
-	void* barcodeReader = DBR_CreateInstance();
-	DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-	char errorMessageInit[256];
-	char errorMessageAppend[256];
-	DBR_InitRuntimeSettingsWithFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-	DBR_AppendTplStringToRuntimeSettings(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-	char pContent[256];
-	DBR_OutputSettingsToString(barcodeReader, pContent, 256, "currentRuntimeSettings");
-	DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	*/
 	DBR_API int DBR_OutputSettingsToString(void* barcodeReader, char content[], const int contentLen, const char* pSettingsName);
@@ -3604,19 +3366,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessageInit[256];
-			char errorMessageAppend[256];
-			 DBR_InitRuntimeSettingsWithFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-			DBR_AppendTplStringToRuntimeSettings(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-			char* pContent = NULL;
-			DBR_OutputSettingsToStringPtr(barcodeReader, &pContent, "currentRuntimeSettings");
-			DBR_FreeSettingsString(&pContent);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 *
 	 */
 	DBR_API int DBR_OutputSettingsToStringPtr(void* barcodeReader, char** content, const char* pSettingsName);
@@ -3626,19 +3375,6 @@ extern "C" {
 	*
 	* @param [in] content The runtime settings string.
 	*
-	* @par Code Snippet:
-	* @code
-		void* barcodeReader = DBR_CreateInstance();
-		DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-		char errorMessageInit[256];
-		char errorMessageAppend[256];
-		DBR_InitRuntimeSettingsWithFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-		DBR_AppendTplStringToRuntimeSettings(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-		char* pContent = NULL;
-		DBR_OutputSettingsToString(barcodeReader, &pContent, "currentRuntimeSettings");
-		DBR_FreeSettingsString(&pContent);
-		DBR_DestroyInstance(barcodeReader);
-	* @endcode
 	*
 	*/
 	DBR_API void DBR_FreeSettingsString(char** content);
@@ -3653,17 +3389,6 @@ extern "C" {
 	 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	 * 		   DBR_GetErrorString() to get detailed error message.
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			char errorMessageInit[256];
-			char errorMessageAppend[256];
-			DBR_InitRuntimeSettingsWithFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-			DBR_AppendTplStringToRuntimeSettings(barcodeReader, "{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-			DBR_OutputSettingsToFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\CurrentRuntimeSettings.json", "currentRuntimeSettings");
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 *
 	 */
 	DBR_API int DBR_OutputSettingsToFile(void* barcodeReader, const char* pFilePath, const char* pSettingsName);
@@ -3689,16 +3414,6 @@ extern "C" {
 	  * @return Returns error code. Returns 0 if the function operates successfully. You can call
 	  * 		   DBR_GetErrorString() to get detailed error message.
 	  *
-	  * @par Code Snippet:
-	  * @code
-			 void* barcodeReader = DBR_CreateInstance();
-			 DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			 TextResultArray* pResults;
-			 int errorCode = DBR_DecodeFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-			 DBR_GetAllTextResults(barcodeReader, &pResults);
-			 DBR_FreeTextResults(&pResults);
-			 DBR_DestroyInstance(barcodeReader);
-	  * @endcode
 	  */
 	DBR_API int DBR_GetAllTextResults(void* barcodeReader, TextResultArray **pResults);
 
@@ -3708,16 +3423,6 @@ extern "C" {
 	 * @param [in] pResults Text results.
 	 *
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			TextResultArray* pResults;
-			int errorCode = DBR_DecodeFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-			DBR_GetAllTextResults(barcodeReader, &pResults);
-			DBR_FreeTextResults(&pResults);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 */
 	DBR_API void  DBR_FreeTextResults(TextResultArray **pResults);
 
@@ -3731,21 +3436,6 @@ extern "C" {
 	 * 		   DBR_GetErrorString() to get detailed error message. Possible returns are:
 	 * 		   DBR_OK;
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			PublicRuntimeSettings settings;
-			DBR_GetRuntimeSettings(barcodeReader, &settings);
-			settings.intermediateResultTypes = IRT_ORIGINAL_IMAGE | IRT_COLOUR_CLUSTERED_IMAGE | IRT_COLOUR_CONVERTED_GRAYSCALE_IMAGE;
-			char errorMessage[256];
-			DBR_UpdateRuntimeSettings(barcodeReader, &settings, errorMessage, 256);
-			DBR_DecodeFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-			IntermediateResultArray* pResults = NULL;
-			DBR_GetIntermediateResults(barcodeReader, &pResults);
-			DBR_FreeIntermediateResults(&pResults);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 *
 	 */
 	DBR_API int DBR_GetIntermediateResults(void *barcodeReader, IntermediateResultArray **pResult);
@@ -3754,22 +3444,6 @@ extern "C" {
 	 * Frees memory allocated for the intermediate results.
 	 *
 	 * @param [in] pResults The intermediate results.
-	 *
-	 * @par Code Snippet:
-	 * @code
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			PublicRuntimeSettings settings;
-			DBR_GetRuntimeSettings(barcodeReader, &settings);
-			settings.intermediateResultTypes = IRT_ORIGINAL_IMAGE | IRT_COLOUR_CLUSTERED_IMAGE | IRT_COLOUR_CONVERTED_GRAYSCALE_IMAGE;
-			char errorMessage[256];
-			DBR_UpdateRuntimeSettings(barcodeReader, &settings, errorMessage, 256);
-			DBR_DecodeFile(barcodeReader, "C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-			IntermediateResultArray* pResults = NULL;
-			DBR_GetIntermediateResults(barcodeReader, &pResults);
-			DBR_FreeIntermediateResults(&pResults);
-			DBR_DestroyInstance(barcodeReader);
-	 * @endcode
 	 *
 	 */
 	DBR_API void DBR_FreeIntermediateResults(IntermediateResultArray **pResults);
@@ -3796,18 +3470,6 @@ extern "C" {
 	  * 		   DBR_OK;
 	  * 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 	  *
-	  * @par Code Snippet:
-	  * @code
-			 void ErrorFunction(int frameId, int errorCode, void * pUser)
-			 {
-				 //TODO add your code for using error code
-			 }
-			 void* barcodeReader = DBR_CreateInstance();
-			 DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			 DBR_SetErrorCallback(barcodeReader, ErrorFunction, NULL);
-			 DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-	  * @endcode
-	  *
 	  */
 	DBR_API	int DBR_SetErrorCallback(void *barcodeReader, CB_Error cbFunction, void * pUser);
 
@@ -3823,17 +3485,6 @@ extern "C" {
 	 * 		   DBR_OK;
 	 * 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void TextResultFunction(int frameId, TextResultArray *pResults, void * pUser)
-			{
-				//TODO add your code for using test results
-			}
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			DBR_SetTextResultCallback(barcodeReader, TextResultFunction, NULL);
-			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-	 * @endcode
 	 *
 	 */
 	DBR_API	int DBR_SetTextResultCallback(void *barcodeReader, CB_TextResult cbFunction, void * pUser);
@@ -3850,22 +3501,6 @@ extern "C" {
 	 * 		   DBR_OK;
 	 * 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 	 *
-	 * @par Code Snippet:
-	 * @code
-			void IntermediateResultFunction(int frameId, IntermediateResultArray *pResults, void * pUser)
-			{
-				//TODO add your code for using intermediate results
-			}
-			void* barcodeReader = DBR_CreateInstance();
-			DBR_InitLicense(barcodeReader, "t0260NwAAAHV***************");
-			PublicRuntimeSettings settings;
-			int errorCode = DBR_GetRuntimeSettings(barcodeReader, &settings);
-			settings.intermediateResultTypes = IRT_ORIGINAL_IMAGE | IRT_COLOUR_CLUSTERED_IMAGE | IRT_COLOUR_CONVERTED_GRAYSCALE_IMAGE;
-			char errorMessage[256];
-			DBR_UpdateRuntimeSettings(barcodeReader, &settings, errorMessage, 256);
-			DBR_SetIntermediateResultCallback(barcodeReader, IntermediateResultFunction, NULL);
-			DBR_StartFrameDecoding(barcodeReader, 2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-	 * @endcode
 	 *
 	 */
 	DBR_API	int DBR_SetIntermediateResultCallback(void *barcodeReader, CB_IntermediateResult cbFunction, void * pUser);
@@ -3962,14 +3597,6 @@ namespace dynamsoft
 			  *
 			  * @return The error message.
 			  *
-			  * @par Code Snippet:
-			  * @code
-					 CBarcodeReader* reader = new CBarcodeReader();
-					 reader->InitLicense("t0260NwAAAHV***************");
-					 int errorCode = reader->DecodeFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-					 const char* errorString = CBarcodeReader::GetErrorString(errorCode);
-					 delete reader;
-			  * @endcode
 			  *
 			  */
 			static const char* GetErrorString(const int iErrorCode);
@@ -3979,10 +3606,6 @@ namespace dynamsoft
 			 *
 			 * @return The version info string.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					const char* versionInfo = CBarcodeReader::GetVersion();
-			 * @endcode
 			 *
 
 			 */
@@ -4070,18 +3693,14 @@ namespace dynamsoft
 			 * Reads product key and activates the SDK.
 			 *
 			 * @param [in] pLicense The product keys.
+			 * @param [in, out] errorMsgBuffer The buffer is allocated by caller and the recommending length is 256. The error message will be copied to the buffer.
+			 * @param [in] errorMsgBufferLen The length of allocated buffer.
 			 *
 			 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					delete reader;
-			 * @endcode
 			 */
-			int InitLicense(const char* pLicense);
+			static int InitLicense(const char* pLicense, char errorMsgBuffer[] = NULL, const int errorMsgBufferLen = 0);
 
 			/**
 			 * Initializes the license and connects to the specified server for online verification.
@@ -4159,13 +3778,6 @@ namespace dynamsoft
 			  * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			  * 		   GetErrorString() to get detailed error message.
 			  *
-			  * @par Code Snippet:
-			  * @code
-					 CBarcodeReader* reader = new CBarcodeReader();
-					 reader->InitLicense("t0260NwAAAHV***************");
-					 int errorCode = reader->DecodeFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-					 delete reader;
-			  * @endcode
 			  *
 			  * @par Remarks:
 			  * If no template name is specified, current runtime settings will be used.
@@ -4182,16 +3794,6 @@ namespace dynamsoft
 			 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					unsigned char* pFileBytes;
-					int nFileSize = 0;
-					GetFileStream("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pFileBytes, &nFileSize);
-					int errorCode = reader->DecodeFileInMemory(pFileBytes, nFileSize, "");
-					delete reader;
-			 * @endcode
 			 *
 			 * @par Remarks:
 			 * If no template name is specified, current runtime settings will be used.
@@ -4211,19 +3813,6 @@ namespace dynamsoft
 			 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					unsigned char* pBufferBytes;
-					int iWidth = 0;
-					int iHeight = 0;
-					int iStride = 0;
-					ImagePixelFormat format;
-					GetBufferFromFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pBufferBytes, &iWidth, &iHeight, &iStride, &format);
-					int errorCode = reader->DecodeBuffer(pBufferBytes, iWidth, iHeight, iStride, format, "");
-					delete reader;
-			 * @endcode
 			 *
 			 * @par Remarks:
 			 * If no template name is specified, current runtime settings will be used.
@@ -4239,18 +3828,6 @@ namespace dynamsoft
 			  * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					unsigned char* pFileBytes;
-					int nFileSize = 0;
-					GetFileStream("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pFileBytes, &nFileSize);
-					char* strBase64String;
-					GetFileBase64String(pBufferBytes, &strBase64String);
-					int errorCode = reader->DecodeBase64String(strBase64String, "");
-					delete reader;
-			 * @endcode
 			 *
 			 * @par Remarks:
 			 * If no template name is specified, current runtime settings will be used.
@@ -4266,15 +3843,6 @@ namespace dynamsoft
 			  * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					HANDLE pDIB;
-					GetDIBFromImage("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", &pDIB);
-					int errorCode = reader->DecodeDIB(pDIB "");
-					delete reader;
-			 * @endcode
 			 *
 			 * @par Remarks:
 			 * If no template name is specified, current runtime settings will be used.
@@ -4321,14 +3889,6 @@ namespace dynamsoft
 			 * 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 			 * 		   DBRERR_PARAMETER_VALUE_INVALID;
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-					delete reader;
-			 * @endcode
-			 *
 			 */
 			int StartFrameDecoding(const int maxQueueLength, const int maxResultQueueLength, const int width, const int height, const int stride, const ImagePixelFormat format, const char *pTemplateName = "");
 
@@ -4344,31 +3904,6 @@ namespace dynamsoft
 			* 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 			* 		   DBRERR_PARAMETER_VALUE_INVALID;
 			*
-			* @par Code Snippet:
-			* @code
-			*		CBarcodeReader* reader = new CBarcodeReader();
-			*		reader->InitLicense("t0260NwAAAHV***************");
-			*		FrameDecodingParameters parameters;
-			*		int errorCode = reader->InitFrameDecodingParameters(&parameters);
-			*		if(errorCode == DBR_OK)
-			*		{
-			*			parameters.maxQueueLength = 3;
-			*			parameters.maxResultQueueLength = 10;
-			*			parameters.width = 1024;
-			*			parameters.height = 720;
-			*			parameters.stride = 1024;
-			*			parameters.imagePixelFormat = IPF_GRAYSCALED;
-			*			parameters.region.regionMeasuredByPercentage = 1;
-			*			parameters.region.regionTop = 0;
-			*			parameters.region.regionBottom = 100;
-			*			parameters.region.regionLeft = 0;
-			*			parameters.region.regionRight = 100;
-			*			parameters.threshold = 0.01;
-			*			parameters.fps = 0;
-			*			reader->StartFrameDecodingEx(parameters, "");
-			*			delete reader;
-			*		}
-			* @endcode
 			*
 			*/
 			int StartFrameDecodingEx(FrameDecodingParameters parameters, const char* pTemplateName = "");
@@ -4380,13 +3915,6 @@ namespace dynamsoft
 			 *
 			 * @return Returns the ID of the appended frame.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					int frameId = reader->AppendFrame(pBufferBytes);
-					delete reader;
-			 * @endcode
 			 *
 			 */
 			int AppendFrame(unsigned char *pBufferBytes);
@@ -4395,14 +3923,6 @@ namespace dynamsoft
 			 * Gets current length of the inner frame queue.
 			 *
 			 * @return Returns the length of the inner frame queue.
-			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					int frameLength = reader->GetLengthOfFrameQueue();
-					delete reader;
-			 * @endcode
 			 *
 			 */
 			int GetLengthOfFrameQueue();
@@ -4415,13 +3935,6 @@ namespace dynamsoft
 			 * 		   DBR_OK;
 			 * 		   DBRERR_STOP_DECODING_THREAD_FAILED;
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					int errorCode = reader->StopFrameDecoding();
-					delete reader;
-			 * @endcode
 			 *
 			 */
 			int StopFrameDecoding();
@@ -4443,15 +3956,6 @@ namespace dynamsoft
 			  * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			  * 		   GetErrorString() to get detailed error message.
 			  *
-			  * @par Code Snippet:
-			  * @code
-					 CBarcodeReader* reader = new CBarcodeReader();
-					 reader->InitLicense("t0260NwAAAHV***************");
-					 PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					 int errorCode = reader->GetRuntimeSettings(pSettings);
-					 delete pSettings;
-					 delete reader;
-			  * @endcode
 			  *
 			  */
 			int GetRuntimeSettings(PublicRuntimeSettings *psettings);
@@ -4467,18 +3971,6 @@ namespace dynamsoft
 			 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					int errorCode = reader->GetRuntimeSettings(pSettings);
-					pSettings->deblurLevel = 9;
-					char errorMessage[256];
-					reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
-					delete pSettings;
-					delete reader;
-			 * @endcode
 			 *
 			 */
 			int UpdateRuntimeSettings(PublicRuntimeSettings *pSettings, char errorMsgBuffer[] = NULL, const int errorMsgBufferLen = 0);
@@ -4489,19 +3981,6 @@ namespace dynamsoft
 			* @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					int errorCode = reader->GetRuntimeSettings(pSettings);
-					pSettings->deblurLevel = 9;
-					char errorMessage[256];
-					reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
-					reader->ResetRuntimeSettings();
-					delete pSettings;
-					delete reader;
-			* @endcode
 			*
 			*/
 			int ResetRuntimeSettings();
@@ -4521,19 +4000,6 @@ namespace dynamsoft
 			 * 		   DBR_OK;
 			 * 		   DBRERR_SET_MODE_ARGUMENT_ERROR;
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					reader->GetRuntimeSettings(pSettings);
-					pSettings->binarizationModes[0] = BM_LOCAL_BLOCK;
-					char errorMessage[256];
-					reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
-					reader->SetModeArgument("BinarizationModes", 0, "EnableFillBinaryVacancy", "1", errorMessage, 256);
-					delete pSettings;
-					delete reader;
-			 * @endcode
 			 *
 			 * @par Remarks:
 			 *		Check @ref ModesArgument for available argument settings
@@ -4556,22 +4022,6 @@ namespace dynamsoft
 			* 		   GetErrorString to get detail message. Possible returns are:
 			* 		   DBR_OK;
 			* 		   DBRERR_GET_MODE_ARGUMENT_ERROR;
-			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					reader->GetRuntimeSettings(pSettings);
-					pSettings->binarizationModes[0] = BM_LOCAL_BLOCK;
-					char errorMessage[256];
-					char argumentValue[480];
-					reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
-					reader->SetModeArgument("BinarizationModes", 0, "EnableFillBinaryVacancy", "1", errorMessage, 256);
-					reader->GetModeArgument("BinarizationModes", 0, "EnableFillBinaryVacancy", argumentValue, 480, errorMessage, 256);
-					delete pSettings;
-					delete reader;
-			* @endcode
 			*
 			* @par Remarks:
 			*		Check @ref ModesArgument for available argument settings
@@ -4600,14 +4050,6 @@ namespace dynamsoft
 			* @return Returns error code. Returns 0 if the function operates successfully. You can call
 			* 		   GetErrorString() to get detailed error message.
 			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessage[256];
-					reader->InitRuntimeSettingsWithFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessage, 256);
-					delete reader;
-			* @endcode
 			*
 			* @sa CBarcodeReader PublicRuntimeSettings
 			*/
@@ -4626,14 +4068,6 @@ namespace dynamsoft
 			* @return Returns error code. Returns 0 if the function operates successfully. You can call
 			* 		   GetErrorString() to get detailed error message.
 			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessage[256];
-					reader->InitRuntimeSettingsWithString("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_OVERWRITE, errorMessage, 256);
-					delete reader;
-			* @endcode
 			*
 			* @sa CBarcodeReader PublicRuntimeSettings
 			*/
@@ -4652,14 +4086,6 @@ namespace dynamsoft
 			* @return Returns error code. Returns 0 if the function operates successfully. You can call
 			* 		   GetErrorString() to get detailed error message.
 			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessage[256];
-					reader->AppendTplFileToRuntimeSettings("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_IGNORE, errorMessage, 256);
-					delete reader;
-			* @endcode
 			*
 			* @sa CBarcodeReader PublicRuntimeSettings
 			*/
@@ -4679,13 +4105,6 @@ namespace dynamsoft
 			* 		   GetErrorString() to get detailed error message.
 			*
 			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessage[256];
-					reader->AppendTplStringToRuntimeSettings("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessage, 256);
-					delete reader;
-			* @endcode
 			*
 			* @sa CBarcodeReader PublicRuntimeSettings
 			*/
@@ -4695,18 +4114,6 @@ namespace dynamsoft
 			* Gets the count of the parameter templates.
 			*
 			* @return Returns the count of parameter template.
-			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessageInit[256];
-					char errorMessageAppend[256];
-					reader->InitRuntimeSettingsWithFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-					reader->AppendTplStringToRuntimeSettings("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-					int currentTemplateCount = reader->GetParameterTemplateCount();
-					delete reader;
-			* @endcode
 			*
 			*/
 			int  GetParameterTemplateCount();
@@ -4723,21 +4130,6 @@ namespace dynamsoft
 			* @return Returns error code. Returns 0 if the function operates successfully. You can call
 			* 		   GetErrorString() to get detailed error message.
 			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessageInit[256];
-					char errorMessageAppend[256];
-					reader->InitRuntimeSettingsWithFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-					reader->AppendTplStringToRuntimeSettings("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-					int currentTemplateCount = reader->GetParameterTemplateCount();
-					int templateIndex = 1;
-					// notice that the value of 'templateIndex' should less than currentTemplateCount.
-					char templateName[256];
-					reader->GetParameterTemplateName(templateIndex, templateName, 256);
-					delete reader;
-			* @endcode
 			*
 			*/
 			int  GetParameterTemplateName(const int index, char nameBuffer[], int nameBufferLen);
@@ -4751,17 +4143,6 @@ namespace dynamsoft
 			* @return Returns error code. Returns 0 if the function operates successfully. You can call
 			* 		   GetErrorString() to get detailed error message.
 			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessageInit[256];
-					char errorMessageAppend[256];
-					reader->InitRuntimeSettingsWithFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-					reader->AppendTplStringToRuntimeSettings("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-					reader->OutputSettingsToFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\CurrentRuntimeSettings.json", "currentRuntimeSettings");
-					delete reader;
-			* @endcode
 			*
 			*/
 			int OutputSettingsToFile(const char* pFilePath, const char* pSettingsName);
@@ -4776,18 +4157,6 @@ namespace dynamsoft
 			* @return Returns error code. Returns 0 if the function operates successfully. You can call
 			* 		   GetErrorString() to get detailed error message.
 			*
-			* @par Code Snippet:
-			* @code
-			CBarcodeReader* reader = new CBarcodeReader();
-			reader->InitLicense("t0260NwAAAHV***************");
-			char errorMessageInit[256];
-			char errorMessageAppend[256];
-			reader->InitRuntimeSettingsWithFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-			reader->AppendTplStringToRuntimeSettings("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-			char content[256];
-			reader->OutputSettingsToString(content, 256, "currentRuntimeSettings");
-			delete reader;
-			* @endcode
 			*
 			*/
 			int OutputSettingsToString(char content[], const int contentLen, const char* pSettingsName);
@@ -4801,20 +4170,6 @@ namespace dynamsoft
 			 * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			* 		   GetErrorString() to get detailed error message.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessageInit[256];
-					char errorMessageAppend[256];
-					reader->InitRuntimeSettingsWithFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-					reader->AppendTplStringToRuntimeSettings("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-					char* content = NULL;
-					reader->OutputSettingsToStringPtr(&content, "currentRuntimeSettings");
-					reader->FreeSettingsString(&content);
-					delete reader;
-			 * @endcode
-			 *
 			 */
 			int OutputSettingsToStringPtr(char** content, const char* pSettingsName);
 
@@ -4823,19 +4178,6 @@ namespace dynamsoft
 			*
 			* @param [in] content The runtime settings string.
 			*
-			* @par Code Snippet:
-			* @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					char errorMessageInit[256];
-					char errorMessageAppend[256];
-					reader->InitRuntimeSettingsWithFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Templates\\RuntimeSettings.json", CM_OVERWRITE, errorMessageInit, 256);
-					reader->AppendTplStringToRuntimeSettings("{\"Version\":\"3.0\", \"ImageParameter\":{\"Name\":\"IP1\", \"BarcodeFormatIds\":[\"BF_QR_CODE\"], \"ExpectedBarcodesCount\":10}}", CM_IGNORE, errorMessageAppend, 256);
-					char* content = NULL;
-					reader->OutputSettingsToStringPtr(&content, "currentRuntimeSettings");
-					reader->FreeSettingsString(&content);
-					delete reader;
-			* @endcode
 			*
 			*/
 			void FreeSettingsString(char** content);
@@ -4859,16 +4201,6 @@ namespace dynamsoft
 			  * @return Returns error code. Returns 0 if the function operates successfully. You can call
 			 * 		   GetErrorString() to get detailed error message.
 			  *
-			  * @par Code Snippet:
-			  * @code
-					 CBarcodeReader* reader = new CBarcodeReader();
-					 reader->InitLicense("t0260NwAAAHV***************");
-					 TextResultArray* pResults;
-					 int errorCode = reader->DecodeFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-					 reader->GetAllTextResults(&pResults);
-					 CBarcodeReader::FreeTextResults(&pResults);
-					 delete reader;
-			  * @endcode
 			  *
 			  */
 			int GetAllTextResults(TextResultArray **pResults);
@@ -4878,16 +4210,6 @@ namespace dynamsoft
 			 *
 			 * @param [in] pResults Text results.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					TextResultArray* pResults;
-					int errorCode = reader->DecodeFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-					reader->GetAllTextResults(&pResults);
-					CBarcodeReader::FreeTextResults(&pResults);
-					delete reader;
-			 * @endcode
 			 *
 			 */
 			static void FreeTextResults(TextResultArray **pResults);
@@ -4901,22 +4223,6 @@ namespace dynamsoft
 			 * 		   GetErrorString() to get detailed error message. Possible returns are:
 			 * 		   DBR_OK;
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					reader->GetRuntimeSettings(pSettings);
-					pSettings->intermediateResultTypes = IRT_ORIGINAL_IMAGE | IRT_COLOUR_CLUSTERED_IMAGE | IRT_COLOUR_CONVERTED_GRAYSCALE_IMAGE;
-					char errorMessage[256];
-					reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
-					reader->DecodeFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-					IntermediateResultArray* pResults = NULL;
-					reader->GetIntermediateResults(&pResults);
-					CBarcodeReader::FreeIntermediateResults(&pResults);
-					delete pSettings;
-					delete reader;
-			 * @endcode
 			 *
 			 */
 			int GetIntermediateResults(IntermediateResultArray **pResults);
@@ -4926,22 +4232,6 @@ namespace dynamsoft
 			 *
 			 * @param [in] pResults The intermediate results.
 			 *
-			 * @par Code Snippet:
-			 * @code
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					reader->GetRuntimeSettings(pSettings);
-					pSettings->intermediateResultTypes = IRT_ORIGINAL_IMAGE | IRT_COLOUR_CLUSTERED_IMAGE | IRT_COLOUR_CONVERTED_GRAYSCALE_IMAGE;
-					char errorMessage[256];
-					reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
-					reader->DecodeFile("C:\\Program Files (x86)\\Dynamsoft\\{Version number}\\Images\\AllSupportedBarcodeTypes.tif", "");
-					IntermediateResultArray* pResults = NULL;
-					reader->GetIntermediateResults(&pResults);
-					CBarcodeReader::FreeIntermediateResults(&pResults);
-					delete pSettings;
-					delete reader;
-			 * @endcode
 			 *
 			 */
 			static void FreeIntermediateResults(IntermediateResultArray **pResults);
@@ -4967,17 +4257,6 @@ namespace dynamsoft
 			  * 		   DBR_OK;
 			  * 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 			  *
-			  * @par Code Snippet:
-			  * @code
-					 void ErrorFunction(int frameId, int errorCode, void * pUser)
-					 {
-						 //TODO add your code for using error code
-					 }
-					 CBarcodeReader* reader = new CBarcodeReader();
-					 reader->InitLicense("t0260NwAAAHV***************");
-					 reader->SetErrorCallback(ErrorFunction, NULL);
-					 reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-			  * @endcode
 			  *
 			  */
 			int SetErrorCallback(CB_Error cbFunction, void * pUser);
@@ -4993,17 +4272,6 @@ namespace dynamsoft
 			 * 		   DBR_OK;
 			 * 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 			 *
-			 * @par Code Snippet:
-			 * @code
-					void TextResultFunction(int frameId, TextResultArray *pResults, void * pUser)
-					{
-						//TODO add your code for using text results
-					}
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					reader->SetTextResultCallback(TextResultFunction, NULL);
-					reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-			 * @endcode
 			 *
 			 */
 			int SetTextResultCallback(CB_TextResult cbFunction, void * pUser);
@@ -5019,22 +4287,6 @@ namespace dynamsoft
 			 * 		   DBR_OK;
 			 * 		   DBRERR_FRAME_DECODING_THREAD_EXISTS;
 			 *
-			 * @par Code Snippet:
-			 * @code
-					void IntermediateResultFunction(int frameId, IntermediateResultArray *pResults, void * pUser)
-					{
-						//TODO add your code for using intermediate results
-					}
-					CBarcodeReader* reader = new CBarcodeReader();
-					reader->InitLicense("t0260NwAAAHV***************");
-					PublicRuntimeSettings* pSettings = new PublicRuntimeSettings;
-					reader->GetRuntimeSettings(pSettings);
-					pSettings->intermediateResultTypes = IRT_ORIGINAL_IMAGE | IRT_COLOUR_CLUSTERED_IMAGE | IRT_COLOUR_CONVERTED_GRAYSCALE_IMAGE;
-					char errorMessage[256];
-					reader->UpdateRuntimeSettings(pSettings, errorMessage, 256);
-					reader->SetIntermediateResultCallback(IntermediateResultFunction, NULL);
-					reader->StartFrameDecoding(2, 10, 1024, 720, 1024, IPF_GRAYSCALED, "");
-			 * @endcode
 			 *
 			 */
 			int SetIntermediateResultCallback(CB_IntermediateResult cbFunction, void * pUser);
