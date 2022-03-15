@@ -5,8 +5,8 @@ MESSAGE( STATUS "PROJECT_NAME: " ${PROJECT_NAME} )
 option(ARM32_BUILD "Build for ARM32" OFF)
 
 # The version number.
-set(BarcodeReader_VERSION_MAJOR 8)
-set(BarcodeReader_VERSION_MINOR 6)
+set(BarcodeReader_VERSION_MAJOR 9)
+set(BarcodeReader_VERSION_MINOR 0)
 
 # Check platforms
 if (CMAKE_HOST_WIN32)
