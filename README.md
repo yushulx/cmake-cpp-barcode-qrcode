@@ -1,7 +1,5 @@
 # Building C/C++ Barcode Reader with CMake
 
-[![release](https://img.shields.io/github/release/Dynamsoft/cmake.svg)](https://github.com/Dynamsoft/cmake/releases/latest)
-
 ## SDK Version
 [v9.0](https://www.dynamsoft.com/barcode-reader/downloads)
 
