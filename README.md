@@ -94,14 +94,14 @@ DBR_InitLicense(license, errorMsgBuffer, 512);
 
 ## Screenshot
 
-![Raspberry Pi Barcode Reader](https://www.codepool.biz/wp-content/uploads/2016/03/rpi_dbr_result.png)
+![Raspberry Pi Barcode Reader](https://www.dynamsoft.com/codepool/img/2016/03/rpi_dbr_result.png)
 
 ## Reference
-* https://cmake.org/cmake-tutorial/
-* https://cmake.org/Wiki/CMake_Useful_Variables
+* https://cmake.org/cmake/help/latest/guide/tutorial/index.html
+* https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Useful-Variables
 * https://stackoverflow.com/questions/10671916/how-to-copy-dll-files-into-the-same-folder-as-the-executable-using-cmake
-* https://cmake.org/Wiki/CMake_RPATH_handling
+* https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 
 ## Blog
-* [CMake: Build C++ Project for Windows, Linux and macOS](http://www.codepool.biz/cmake-cc-windows-linux-macos.html)
-* [My First C/C++ App Built with CMake on Windows](http://www.codepool.biz/cc-barcode-app-cmake-windows.html)
+* [CMake: Build C++ Project for Windows, Linux and macOS](https://www.dynamsoft.com/codepool/cmake-cc-windows-linux-macos.html)
+* [My First C/C++ App Built with CMake on Windows](https://www.dynamsoft.com/codepool/cc-barcode-app-cmake-windows.html)
