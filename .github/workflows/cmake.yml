@@ -43,7 +43,7 @@ jobs:
       uses: thedoctor0/zip-release@main
       with:
         type: 'zip'
-        filename: 'BarcodeReader.zip'
+        filename: ${{ matrix.os }}.zip
         exclusions: '*.git* /*node_modules/* .editorconfig'
         path: ${{github.workspace}}/dist
 
