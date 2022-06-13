@@ -45,6 +45,7 @@ jobs:
         type: 'zip'
         filename: 'BarcodeReader.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig'
+        path: ${{github.workspace}}/dist
 
     - uses: actions/upload-artifact@v2
       with:
