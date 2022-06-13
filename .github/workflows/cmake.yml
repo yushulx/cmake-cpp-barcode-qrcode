@@ -39,4 +39,13 @@ jobs:
       working-directory: ${{github.workspace}}/dist
       run: ./BarcodeReader  ../images/AllSupportedBarcodeTypes.png ../license-key.txt
         
-      
+    - name: Archive Release
+      uses: thedoctor0/zip-release@main
+      with:
+        type: 'zip'
+        filename: 'BarcodeReader.zip'
+        exclusions: '*.git* /*node_modules/* .editorconfig'
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: ./*.zip
