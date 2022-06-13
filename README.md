@@ -1,13 +1,13 @@
 # Building C/C++ Barcode Reader with CMake
 
 ## SDK Version
-[v9.0](https://www.dynamsoft.com/barcode-reader/downloads)
+[v9.2](https://www.dynamsoft.com/barcode-reader/downloads)
 
 ## SDK Activation
-Click [here](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr) to get a trial license.
+Apply for a [30-day free trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr).
 
 ## Supported Platforms
-- Windows x86/x64
+- Windows x64
 - Linux x64/ARM64
 - macOS x64 
 - Raspberry Pi ARMv7
@@ -34,6 +34,7 @@ DBR_InitLicense(license, errorMsgBuffer, 512);
     cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..
     
     cmake --build . --config release
+    cmake --install .
     ```
 
     For `MinGW`:
@@ -61,6 +62,7 @@ DBR_InitLicense(license, errorMsgBuffer, 512);
     cmake ..
     # cmake -DARM32_BUILD=TRUE ..
     cmake --build . --config release 
+    cmake --install .
     ```
 4. Run the app:
     ```
@@ -84,6 +86,7 @@ DBR_InitLicense(license, errorMsgBuffer, 512);
     ```bash
     cmake ..
     cmake --build . --config release 
+    cmake --install .
     ```
 
 4. Run the app:
