@@ -7,7 +7,7 @@
 using namespace std;
 using namespace dynamsoft::dbr;
 
-#if defined(LINUX) || defined(MACOS)
+#if !defined(_WIN32) && !defined(_WIN64)
 #include <sys/time.h>
 
 int gettime()
