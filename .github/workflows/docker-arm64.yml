@@ -20,7 +20,7 @@ jobs:
         
     - name: CMake build and run
       run: |
-        docker run --platform linux/arm/v7 --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp arm32v7/gcc bash -c "apt update && apt install -y cmake; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
+        docker run --platform linux/arm/v7 --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp multiarch/ubuntu-core:armhf-bionic bash -c "apt update && apt install cmake g++ -y; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
         
     - name: Archive Release
       uses: thedoctor0/zip-release@main
@@ -44,7 +44,7 @@ jobs:
         
     - name: CMake build and run
       run: |
-        docker run --platform linux/arm64/v8 --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp arm64v8/gcc bash -c "apt update && apt install -y cmake; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
+        docker run --platform linux/arm64/v8 --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp multiarch/ubuntu-core:arm64-bionic bash -c "apt update && apt install cmake g++ -y; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
         
     - name: Archive Release
       uses: thedoctor0/zip-release@main
