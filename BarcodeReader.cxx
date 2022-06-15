@@ -211,28 +211,30 @@ int main(int argc, const char *argv[])
 		return 0;
 	}
 
-	char *license = NULL;
 	char *config = NULL;
 	switch (argc)
 	{
 	case 4:
 		config = read_file_text(argv[3]);
 	case 3:
-		license = read_file_text(argv[2]);
+		string license;
+		ifstream myfile(argv[2]);
+		if (myfile.is_open())
+		{
+			myfile >> license;
+			myfile.close();
+
+			char errorMsgBuffer[512];
+			// Click https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr to get a trial license.
+			DBR_InitLicense(license.c_str(), errorMsgBuffer, 512);
+			printf("DBR_InitLicense: %s\n", errorMsgBuffer);
+		}
 	}
 
 	int size = 0;
 	unsigned char *buffer = read_file_binary(argv[1], &size);
 	if (!buffer)
 		return 0;
-
-	if (license)
-	{
-		char errorMsgBuffer[512];
-		// Click https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr to get a trial license.
-		DBR_InitLicense(license, errorMsgBuffer, 512);
-		printf("DBR_InitLicense: %s\n", errorMsgBuffer);
-	}
 
 	// Call decoding methods on the main thread
 	printf("---------------- Single thread decoding performance ----------------\n\n");
@@ -271,7 +273,6 @@ int main(int argc, const char *argv[])
 	printf("-------------------------------- All --------------------------------\n\n");
 	multi_thread_performance((int)processor_count, buffer, size, BF_ALL, config);
 
-	free(license);
 	free(config);
 	free(buffer);
 	return 0;
