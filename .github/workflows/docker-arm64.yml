@@ -7,7 +7,6 @@ on:
     branches: [ "main" ]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
 jobs:
@@ -22,7 +21,7 @@ jobs:
     - name: CMake build and run
       run: |
         docker run --rm --privileged multiarch/qemu-user-static:register --reset 
-        docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp multiarch/ubuntu-core:armhf-bionic bash -c "apt update && apt install -y cmake g++; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
+        docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp arm32v7/gcc bash -c "apt update && apt install -y cmake; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
         
     - name: Archive Release
       uses: thedoctor0/zip-release@main
@@ -47,38 +46,13 @@ jobs:
     - name: CMake build and run
       run: |
         docker run --rm --privileged multiarch/qemu-user-static:register --reset 
-        docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp multiarch/ubuntu-core:arm64-bionic bash -c "apt update && apt install -y cmake g++; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
+        docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp arm64v8/gcc bash -c "apt update && apt install -y cmake; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
         
     - name: Archive Release
       uses: thedoctor0/zip-release@main
       with:
         type: 'zip'
         filename: arm64.zip
-        exclusions: '*.git* /*node_modules/* .editorconfig'
-        path: ${{github.workspace}}/dist
-
-    - uses: actions/upload-artifact@v2
-      with:
-        path: ./*.zip
-
-  x86_64_build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3  
-    
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-        
-    - name: CMake build and run
-      run: |
-        docker run --rm --privileged multiarch/qemu-user-static:register --reset 
-        docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp multiarch/ubuntu-core:x86_64-bionic bash -c "apt update && apt install -y cmake g++; mkdir build && cmake -B build && cmake --build build --config release && cmake --install build; ./dist/BarcodeReader ./images/AllSupportedBarcodeTypes.png ./license-key.txt"
-        
-    - name: Archive Release
-      uses: thedoctor0/zip-release@main
-      with:
-        type: 'zip'
-        filename: x64.zip
         exclusions: '*.git* /*node_modules/* .editorconfig'
         path: ${{github.workspace}}/dist
 
