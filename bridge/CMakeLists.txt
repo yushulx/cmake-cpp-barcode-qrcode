@@ -10,5 +10,5 @@ endif()
 
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/../include/")
 add_library(bridge SHARED bridge.cpp)
-target_link_libraries (${PROJECT_NAME} "DynamsoftLicensex64" "DynamsoftCaptureVisionRouterx64")
+target_link_libraries (${PROJECT_NAME} "DynamsoftLicensex64" "DynamsoftBarcodeReaderx64" "DynamsoftCaptureVisionRouterx64")
 
