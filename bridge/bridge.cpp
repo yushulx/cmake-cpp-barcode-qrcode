@@ -1,127 +1,124 @@
 #include <iostream>
 #include "bridge.h"
 
-extern "C"
+C_API int DBR_InitLicense(const char *pLicense, char errorMsgBuffer[], const int errorMsgBufferLen)
 {
-    C_API int DBR_InitLicense(const char *pLicense, char errorMsgBuffer[], const int errorMsgBufferLen)
-    {
-        return CLicenseManager::InitLicense(pLicense, errorMsgBuffer, 512);
-    }
+    return CLicenseManager::InitLicense(pLicense, errorMsgBuffer, 512);
+}
 
-    C_API void *DBR_CreateInstance()
-    {
-        BarcodeReader *barcodeReader = (BarcodeReader *)calloc(1, sizeof(BarcodeReader));
-        CCaptureVisionRouter *cvr = new CCaptureVisionRouter;
-        barcodeReader->cvr = cvr;
-        barcodeReader->result = NULL;
-        return (void *)barcodeReader;
-    }
+C_API void *DBR_CreateInstance()
+{
+    BarcodeReader *barcodeReader = (BarcodeReader *)calloc(1, sizeof(BarcodeReader));
+    CCaptureVisionRouter *cvr = new CCaptureVisionRouter;
+    barcodeReader->cvr = cvr;
+    barcodeReader->result = NULL;
+    return (void *)barcodeReader;
+}
 
-    C_API void DBR_DestroyInstance(void *barcodeReader)
-    {
-        if (barcodeReader != NULL)
-        {
-            BarcodeReader *reader = (BarcodeReader *)barcodeReader;
-            if (reader->cvr != NULL)
-            {
-                delete reader->cvr;
-                reader->cvr = NULL;
-            }
-
-            if (reader->result != NULL)
-            {
-                delete reader->result;
-                reader->result = NULL;
-            }
-        }
-    }
-
-    C_API int DBR_DecodeFile(void *barcodeReader, const char *pFileName, const char *pTemplateName)
+C_API void DBR_DestroyInstance(void *barcodeReader)
+{
+    if (barcodeReader != NULL)
     {
         BarcodeReader *reader = (BarcodeReader *)barcodeReader;
-        if (!reader || !reader->cvr)
-            return -1;
-
-        CCapturedResult *result = reader->cvr->Capture(pFileName, CPresetTemplate::PT_READ_BARCODES);
-        int errorCode = result->GetErrorCode();
-        if (result->GetErrorCode() != 0)
+        if (reader->cvr != NULL)
         {
-            cout << "Error: " << result->GetErrorCode() << "," << result->GetErrorString() << endl;
+            delete reader->cvr;
+            reader->cvr = NULL;
         }
 
-        reader->result = result;
-
-        return errorCode;
-    }
-
-    C_API const char *DBR_GetVersion()
-    {
-        return CBarcodeReaderModule::GetVersion();
-    }
-
-    C_API int DBR_GetAllTextResults(void *barcodeReader, TextResultArray **pResults)
-    {
-        BarcodeReader *reader = (BarcodeReader *)barcodeReader;
-        if (!reader || !reader->cvr || !reader->result)
-            return -1;
-
-        CCapturedResult *result = reader->result;
-
-        int capturedResultItemCount = result->GetCount();
-        if (capturedResultItemCount == 0)
-            return -1;
-
-        TextResultArray *textResults = (TextResultArray *)calloc(1, sizeof(TextResultArray));
-        textResults->resultsCount = capturedResultItemCount;
-        textResults->results = (TextResult *)calloc(capturedResultItemCount, sizeof(TextResult));
-        *pResults = textResults;
-
-        for (int j = 0; j < capturedResultItemCount; j++)
+        if (reader->result != NULL)
         {
-            const CCapturedResultItem *capturedResultItem = result->GetItem(j);
-            CapturedResultItemType type = capturedResultItem->GetType();
-            if (type == CapturedResultItemType::CRIT_BARCODE)
-            {
-                const CBarcodeResultItem *barcodeResultItem = dynamic_cast<const CBarcodeResultItem *>(capturedResultItem);
-                // cout << "Result " << j + 1 << endl;
-                // cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
-                // cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
-                char *barcodeFormatString = (char *)barcodeResultItem->GetFormatString();
-                char *barcodeText = (char *)barcodeResultItem->GetText();
-                textResults->results[j].barcodeFormatString = (char *)malloc(strlen(barcodeFormatString) + 1);
-                strcpy(textResults->results[j].barcodeFormatString, barcodeFormatString);
-                textResults->results[j].barcodeText = (char *)malloc(strlen(barcodeText) + 1);
-                strcpy(textResults->results[j].barcodeText, barcodeText);
-            }
+            delete reader->result;
+            reader->result = NULL;
         }
+    }
+}
 
-        delete result;
-        reader->result = NULL;
+C_API int DBR_DecodeFile(void *barcodeReader, const char *pFileName, const char *pTemplateName)
+{
+    BarcodeReader *reader = (BarcodeReader *)barcodeReader;
+    if (!reader || !reader->cvr)
+        return -1;
 
-        return 0;
+    CCapturedResult *result = reader->cvr->Capture(pFileName, CPresetTemplate::PT_READ_BARCODES);
+    int errorCode = result->GetErrorCode();
+    if (result->GetErrorCode() != 0)
+    {
+        cout << "Error: " << result->GetErrorCode() << "," << result->GetErrorString() << endl;
     }
 
-    C_API void DBR_FreeTextResults(TextResultArray **pResults)
+    reader->result = result;
+
+    return errorCode;
+}
+
+C_API const char *DBR_GetVersion()
+{
+    return CBarcodeReaderModule::GetVersion();
+}
+
+C_API int DBR_GetAllTextResults(void *barcodeReader, TextResultArray **pResults)
+{
+    BarcodeReader *reader = (BarcodeReader *)barcodeReader;
+    if (!reader || !reader->cvr || !reader->result)
+        return -1;
+
+    CCapturedResult *result = reader->result;
+
+    int capturedResultItemCount = result->GetCount();
+    if (capturedResultItemCount == 0)
+        return -1;
+
+    TextResultArray *textResults = (TextResultArray *)calloc(1, sizeof(TextResultArray));
+    textResults->resultsCount = capturedResultItemCount;
+    textResults->results = (TextResult *)calloc(capturedResultItemCount, sizeof(TextResult));
+    *pResults = textResults;
+
+    for (int j = 0; j < capturedResultItemCount; j++)
     {
-        if (pResults)
+        const CCapturedResultItem *capturedResultItem = result->GetItem(j);
+        CapturedResultItemType type = capturedResultItem->GetType();
+        if (type == CapturedResultItemType::CRIT_BARCODE)
         {
-            if (*pResults)
+            const CBarcodeResultItem *barcodeResultItem = dynamic_cast<const CBarcodeResultItem *>(capturedResultItem);
+            // cout << "Result " << j + 1 << endl;
+            // cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
+            // cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
+            char *barcodeFormatString = (char *)barcodeResultItem->GetFormatString();
+            char *barcodeText = (char *)barcodeResultItem->GetText();
+            textResults->results[j].barcodeFormatString = (char *)malloc(strlen(barcodeFormatString) + 1);
+            strcpy(textResults->results[j].barcodeFormatString, barcodeFormatString);
+            textResults->results[j].barcodeText = (char *)malloc(strlen(barcodeText) + 1);
+            strcpy(textResults->results[j].barcodeText, barcodeText);
+        }
+    }
+
+    delete result;
+    reader->result = NULL;
+
+    return 0;
+}
+
+C_API void DBR_FreeTextResults(TextResultArray **pResults)
+{
+    if (pResults)
+    {
+        if (*pResults)
+        {
+            if ((*pResults)->results)
             {
-                if ((*pResults)->results)
+                for (int i = 0; i < (*pResults)->resultsCount; i++)
                 {
-                    for (int i = 0; i < (*pResults)->resultsCount; i++)
+                    if ((*pResults)->results[i].barcodeFormatString)
                     {
-                        if ((*pResults)->results[i].barcodeFormatString)
-                        {
-                            free((*pResults)->results[i].barcodeFormatString);
-                        }
-                        if ((*pResults)->results[i].barcodeText)
-                        {
-                            free((*pResults)->results[i].barcodeText);
-                        }
+                        free((*pResults)->results[i].barcodeFormatString);
                     }
-                    free((*pResults)->results);
+                    if ((*pResults)->results[i].barcodeText)
+                    {
+                        free((*pResults)->results[i].barcodeText);
+                    }
                 }
+                free((*pResults)->results);
             }
         }
     }
