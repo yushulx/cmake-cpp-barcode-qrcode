@@ -8,7 +8,7 @@ C_API int DBR_InitLicense(const char *pLicense, char errorMsgBuffer[], const int
 
 C_API void *DBR_CreateInstance()
 {
-    BarcodeReader *barcodeReader = (BarcodeReader *)calloc(1, sizeof(BarcodeReader));
+    BarcodeReader *barcodeReader = new BarcodeReader;
     CCaptureVisionRouter *cvr = new CCaptureVisionRouter;
     barcodeReader->cvr = cvr;
     barcodeReader->result = NULL;
@@ -31,6 +31,9 @@ C_API void DBR_DestroyInstance(void *barcodeReader)
             delete reader->result;
             reader->result = NULL;
         }
+
+        delete barcodeReader;
+        barcodeReader = NULL;
     }
 }
 
