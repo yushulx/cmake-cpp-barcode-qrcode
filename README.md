@@ -1,7 +1,7 @@
 # Building C/C++ Barcode Reader with CMake
 
 ## SDK Version
-[v9.6.20](https://www.dynamsoft.com/barcode-reader/downloads)
+v9.6.40
 
 ## SDK Activation
 Apply for a [30-day free trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr).

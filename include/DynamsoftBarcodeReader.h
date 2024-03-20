@@ -2717,8 +2717,38 @@ typedef struct tagDM_DLSConnectionParameters DM_DLSConnectionParameters;
 typedef struct tagDM_DLSConnectionParameters DM_LTSConnectionParameters;
 
 /**
+
+ * @brief Struct to represent the status of an instance pool.
+
+ *
+
+ * This struct contains information about the current status of an instance pool,
+
+ * including the number of authorized instances, remaining available instances,
+
+ * instances waiting to be acquired, and the total occurrences of waiting events.
+
+ */
+
+typedef struct tagInstancePoolStatus
+{
+	/** The number of authorized instances, which represents the maximum available instances. */
+	int authorizedInstancesCount; 
+	/** The count of available instances that are currently not in use. */
+	int remainingInstancesCount;
+	/** The number of 'GetInstance' requests that are currently waiting because there are no available instances in the pool. */
+	int waitingCreationInstances;
+	/** The total count of times that any operation has encountered a wait state. */
+	int totalWaitOccurrences;
+}InstancePoolStatus;
+
+
+
+
+/**
  * @}defgroup Struct Struct
  */
+
 
 
 
@@ -3599,18 +3629,19 @@ extern "C" {
 	 *
 	 * @param [in] countForThisDevice The maximum number of concurrent instances that the current device can run.
 	 * @param [in] countForThisProcess Optional The maximum number of concurrent instances that the current process can run.
+	 * @param [in] timeOut The maximum time(in millseconds) to wait for an available authorization or instance when calling Initlicense,GetInstance,or Deocode functions.
 	 *
 	 */
-	DBR_API void DBR_SetMaxConcurrentInstanceCount(int countForThisDevice, int countForThisProcess);
+	DBR_API int DBR_SetMaxConcurrentInstanceCount(int countForThisDevice, int countForThisProcess,int timeOut);
 
 	/**
-	 * Gets an idle Dynamsoft Barcode Reader instance running on concurrent instance mode.
+	 * Creates an instance of Dynamsoft Barcode Reader.
 	 *
 	 */
 	DBR_API void* DBR_GetInstance();
 
 	/**
-	 *Recycles a Dynamsoft Barcode Reader instance running on concurrent instance mode.
+	 *Destroys an instance of Dynamsoft Barcode Reader.
 	 *
 	 */
 	DBR_API void DBR_RecycleInstance(void* barcodeReader);
@@ -3642,6 +3673,10 @@ extern "C" {
 	*Frees memory allocated for the  string.
 	*/
 	DBR_API void DBR_FreeString(char** content);
+
+
+
+	DBR_API InstancePoolStatus DBR_GetInstancePoolStatus();
 	/**
 	 * @}defgroup CCallback
 	 */
@@ -4497,9 +4532,10 @@ namespace dynamsoft
 			 *
 			 * @param [in] countForThisDevice The maximum number of concurrent instances that the current device can run.
 			 * @param [in] countForThisProcess Optional The maximum number of concurrent instances that the current process can run.
+			 * @param [in] timeOut The maximum time(in millseconds) to wait for an available authorization or instance when calling Initlicense,GetInstance,or Deocode functions.
 			 *
 			 */
-			static void SetMaxConcurrentInstanceCount(int countForThisDevice, int countForThisProcess = 0);
+			static int SetMaxConcurrentInstanceCount(int countForThisDevice, int countForThisProcess = 0,int timeout = 0);
 
 			/**
 			 * Gets an idle Dynamsoft Barcode Reader instance running on concurrent instance mode.
@@ -4507,7 +4543,7 @@ namespace dynamsoft
 			 */
 			static CBarcodeReader* GetInstance();
 
-			/**
+			/**	
 			 *Recycles a Dynamsoft Barcode Reader instance running on concurrent instance mode.
 			 *
 			 */
@@ -4530,6 +4566,9 @@ namespace dynamsoft
 			*Frees memory allocated for the string.
 			*/
 			static void FreeString(char** content);
+
+
+			static InstancePoolStatus GetInstancePoolStatus();
 		private:
 			CBarcodeReader(const CBarcodeReader& r);
 
