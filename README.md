@@ -8,6 +8,18 @@ This repository contains examples demonstrating how to utilize the **Dynamsoft B
     DBR_InitLicense(license, errorMsgBuffer, 512);
     ```
 
+- OpenCV Installation
+    1. Download [OpenCV](https://opencv.org/releases/)
+    2. Configure the environment variable `OpenCV_DIR` to the path of the OpenCV installation directory.
+    3. Add the following lines to the `CMakeLists.txt` file:
+    
+        ```cmake
+        # Find OpenCV, you may need to set OpenCV_DIR variable
+        # to the absolute path to the directory containing OpenCVConfig.cmake file
+        # via the command line or GUI
+        find_package(OpenCV REQUIRED)
+        ```
+
 ## Supported Platforms
 - Windows x64
 - Linux x64/ARM64/ARM32
@@ -92,10 +104,17 @@ This repository contains examples demonstrating how to utilize the **Dynamsoft B
     ./main [image-file] [optional: license-file] [optional: template-file]
     ```
         
+    ![Raspberry Pi Barcode Reader](https://www.dynamsoft.com/codepool/img/2016/03/rpi_dbr_result.png)
 
-## Screenshots    
+- [Barcode Image File](./examples/9.x/opencv_file)
+    
+    ```bash
+    ./main 
+    ```
+    
+    ![Read barcodes from an image file](https://www.dynamsoft.com/codepool/img/2024/05/cpp-barcode-reader-opencv.jpg)
 
-![Raspberry Pi Barcode Reader](https://www.dynamsoft.com/codepool/img/2016/03/rpi_dbr_result.png)
+
 
 ## Blog
 - [CMake: Build C++ Project for Windows, Linux and macOS](https://www.dynamsoft.com/codepool/cmake-cc-windows-linux-macos.html)

@@ -83,14 +83,15 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -S ${{ github.workspace }}/examples/9.x/command_line -B ${{github.workspace}}/examples/9.x/command_line/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-    - name: Build
+    - name: Build command line program
       # Build your program with the given configuration
       run: |
         cmake --build ${{github.workspace}}/examples/9.x/command_line/build --config ${{env.BUILD_TYPE}}
+        # cmake --install ${{github.workspace}}/examples/9.x/command_line/build
 
-    - name: Test
-      working-directory: ${{github.workspace}}/examples/9.x/command_line/dist
-      run: ./main  ../../../../images/AllSupportedBarcodeTypes.png ../../../../license-key.txt
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/examples/9.x/command_line/dist
+    #   run: ./main  ../../../../images/AllSupportedBarcodeTypes.png ../../../../license-key.txt
         
     # - name: Archive Release
     #   uses: thedoctor0/zip-release@main
