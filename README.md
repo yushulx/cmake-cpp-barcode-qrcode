@@ -1,4 +1,4 @@
-# Building Barcode and QR Code Reader with C++ and CMake
+# Building 1D/2D Barcode Reader with C++ and CMake
 This repository contains examples demonstrating how to utilize the **Dynamsoft Barcode Reader SDK** to build barcode and QR code detection applications with C++ and CMake on **Windows**, **Linux**, **macOS**, and **Raspberry Pi**.
 
 ## Prerequisites
