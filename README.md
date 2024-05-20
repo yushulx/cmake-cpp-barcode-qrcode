@@ -1,40 +1,39 @@
-# Building C/C++ Barcode Reader with CMake
+# Building Barcode and QR Code Reader with C++ and CMake
+This repository contains examples demonstrating how to utilize the **Dynamsoft Barcode Reader SDK** to build barcode and QR code detection applications with C++ and CMake on **Windows**, **Linux**, **macOS**, and **Raspberry Pi**.
 
-## SDK Version
-v9.6.40
+## Prerequisites
+- Obtain a [30-day free trial license](https://www.dynamsoft.com/customer/license/trialLicense/) for Dynamsoft Barcode Reader. Update the following code in `main.cxx`:
 
-## SDK Activation
-Apply for a [30-day free trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr).
+    ```cpp
+    DBR_InitLicense(license, errorMsgBuffer, 512);
+    ```
 
 ## Supported Platforms
 - Windows x64
-- Linux x64/ARM64
-- macOS x64 
-- Raspberry Pi ARMv7
+- Linux x64/ARM64/ARM32
+- macOS x64 (Intel/Apple Silicon)
 
-## Setting License
-Set the license key in `BarcodeReader.cxx`:
+## How to Build a CMake Project
 
-```cpp
-DBR_InitLicense(license, errorMsgBuffer, 512);
-```
+**Windows**
 
-## Windows
 1. Create a **build** folder:
-    ```
+    
+    ```bash
     mkdir build
     cd build
     ```
+
 2. Configure and build the project:
+    
     ```bash
-    // x86
+    # x86
     cmake -DCMAKE_GENERATOR_PLATFORM=x86 ..
 
-    // x64
+    # x64
     cmake -DCMAKE_GENERATOR_PLATFORM=x64 ..
     
     cmake --build . --config release
-    cmake --install .
     ```
 
     For `MinGW`:
@@ -42,41 +41,39 @@ DBR_InitLicense(license, errorMsgBuffer, 512);
     ```bash
     cmake -G "MinGW Makefiles" ..
     ```
-3. Run the app:
-    ```
-    .\Release\BarcodeReader.exe [image-file] [optional: license-file] [optional: template-file]
-    ```
 
-## Linux and Raspberry Pi OS
+**Linux and Raspberry Pi OS**
+
 1. Install **CMake**:
+    
     ```bash
     sudo apt-get install cmake
     ```
+
 2. Create a **build** folder:
-    ```
+    
+    ```bash
     mkdir build
     cd build
     ```
+
 3. Configure and build the project:
     ```bash
     cmake ..
-    # cmake -DARM32_BUILD=TRUE ..
     cmake --build . --config release 
-    cmake --install .
-    ```
-4. Run the app:
-    ```
-    ./BarcodeReader [image-file] [optional: license-file] [optional: template-file]
     ```
 
-## macOS 
+**macOS**
+ 
 1. Install **CMake**:
+    
     ```bash
     brew install cmake
     ```
+
 2. Create a **build** folder:
 
-    ```
+    ```bash
     mkdir build
     cd build
     ```
@@ -86,25 +83,22 @@ DBR_InitLicense(license, errorMsgBuffer, 512);
     ```bash
     cmake ..
     cmake --build . --config release 
-    cmake --install .
     ```
 
-4. Run the app:
-
+## Examples
+- [Command Line](./examples/9.x/command_line)
+    
+    ```bash
+    ./main [image-file] [optional: license-file] [optional: template-file]
     ```
-    ./BarcodeReader [image-file] [optional: license-file] [optional: template-file]
-    ```
+        
 
-## Screenshot
+## Screenshots    
 
 ![Raspberry Pi Barcode Reader](https://www.dynamsoft.com/codepool/img/2016/03/rpi_dbr_result.png)
 
-## Reference
-* https://cmake.org/cmake/help/latest/guide/tutorial/index.html
-* https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Useful-Variables
-* https://stackoverflow.com/questions/10671916/how-to-copy-dll-files-into-the-same-folder-as-the-executable-using-cmake
-* https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
-
 ## Blog
-* [CMake: Build C++ Project for Windows, Linux and macOS](https://www.dynamsoft.com/codepool/cmake-cc-windows-linux-macos.html)
-* [My First C/C++ App Built with CMake on Windows](https://www.dynamsoft.com/codepool/cc-barcode-app-cmake-windows.html)
+- [CMake: Build C++ Project for Windows, Linux and macOS](https://www.dynamsoft.com/codepool/cmake-cc-windows-linux-macos.html)
+- [My First C/C++ App Built with CMake on Windows](https://www.dynamsoft.com/codepool/cc-barcode-app-cmake-windows.html)
+- [How to Port Visual Studio C++ Project to Linux with CMake](https://www.dynamsoft.com/codepool/port-visual-studio-cpp-linux-cmake.html)
+- [Transforming Raspberry Pi 4 into a Barcode Scanner with a C++ App, USB Camera, and OLED Display](https://www.dynamsoft.com/codepool/raspberry-pi-cpp-barcode-reader.html)
