@@ -41,7 +41,7 @@ The sample demonstrates how to build a C/C++ barcode reader app on `Raspberry Pi
     cd build
     cmake ..
     cmake --build .
-    ./BarcodeReader
+    ./main
     ```
      
     ![Raspberry Pi barcode QR detection](https://www.dynamsoft.com/codepool/wp-content/uploads/2020/06/raspberry-pi-barcode-qr.png)
@@ -51,7 +51,7 @@ The sample demonstrates how to build a C/C++ barcode reader app on `Raspberry Pi
   
       ```
       #!/bin/sh
-      /home/pi/raspberry-pi-cpp-barcode/build/BarcodeReader
+      /home/pi/raspberry-pi-cpp-barcode/build/main
       ```
       
 2. Change the file permission:
