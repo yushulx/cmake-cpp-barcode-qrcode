@@ -35,6 +35,7 @@ struct BarcodeResult
 	std::string type;
 	std::string value;
 	std::vector<cv::Point> localizationPoints;
+	int frameId;
 };
 
 std::vector<BarcodeResult> barcodeResults;
@@ -79,7 +80,7 @@ void textResultCallback(int frameId, TextResultArray *pResults, void *pUser)
 		BarcodeResult result;
 		result.type = pResults->results[iIndex]->barcodeFormatString;
 		result.value = pResults->results[iIndex]->barcodeText;
-
+		result.frameId = frameId;
 		result.localizationPoints.push_back(cv::Point(localizationResult->x1, localizationResult->y1));
 		result.localizationPoints.push_back(cv::Point(localizationResult->x2, localizationResult->y2));
 		result.localizationPoints.push_back(cv::Point(localizationResult->x3, localizationResult->y3));
@@ -93,6 +94,12 @@ void textResultCallback(int frameId, TextResultArray *pResults, void *pUser)
 
 void errorcb(int frameId, int errorCode, void *pUser)
 {
+	std::lock_guard<std::mutex> lock(barcodeResultsMutex);
+	if (barcodeResults.size() > 0 && barcodeResults[0].frameId != frameId)
+	{
+		barcodeResults.clear();
+	}
+
 	if (errorCode != DBR_OK && errorCode != DBRERR_LICENSE_EXPIRED && errorCode != DBRERR_QR_LICENSE_INVALID &&
 		errorCode != DBRERR_1D_LICENSE_INVALID && errorCode != DBRERR_PDF417_LICENSE_INVALID && errorCode != DBRERR_DATAMATRIX_LICENSE_INVALID)
 	{
