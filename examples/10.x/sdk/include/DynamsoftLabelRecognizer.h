@@ -20,7 +20,7 @@
 
 #include "DynamsoftCore.h"
 
-#define DLR_VERSION                  "3.2.10.0220"
+#define DLR_VERSION                  "3.2.30.0797"
 
 /**Structures section*/
 
@@ -209,6 +209,14 @@ namespace dynamsoft
 				 * @param text The text to be set.
 				 */
 				virtual void SetText(const char* text) = 0;
+
+				/**
+				* Gets the name of the text line specification that generated this element.
+				*
+				* @return Returns the name of the text line specification.
+				*
+				*/
+				virtual const char* GetSpecificationName() const = 0;
 			};
 
 			/**
@@ -398,6 +406,13 @@ namespace dynamsoft
 			*/
 			virtual const CCharacterResult* GetCharacterResult(int index) const = 0;
 
+			/**
+			* Gets the name of the text line specification that generated this item.
+			*
+			* @return Returns the name of the text line specification.
+			*
+			*/
+			virtual const char* GetSpecificationName() const = 0;
 		};
 
 		/**
@@ -541,6 +556,153 @@ namespace dynamsoft
 			 * @return An instance of CLocalizedTextLineElement
 			 */
 			static intermediate_results::CLocalizedTextLineElement* CreateLocalizedTextLineElement();
+		};
+
+		/**
+		* The CBufferedCharacterItem class represents a buffered character item.
+		*
+		*/
+		class DLR_API CBufferedCharacterItem
+		{
+		public:
+			/**
+			 * Destructor
+			 */
+			virtual ~CBufferedCharacterItem() {};
+
+			/**
+			* Gets the buffered character.
+			*
+			* @return Returns the buffered character.
+			*
+			*/
+			virtual char GetCharacter() const = 0;
+
+			/**
+			* Gets the image data of the buffered character.
+			*
+			* @return Returns the image data of the buffered character.
+			*
+			*/
+			virtual CImageData* GetImage() const = 0;
+
+			/**
+			* Gets the number of features of the buffered character.
+			*
+			* @return Returns the number of features of the buffered character.
+			*
+			*/
+			virtual int GetFeaturesCount() const = 0;
+
+			/**
+			* Gets the feature id and value of the buffered character at the specified index.
+			*
+			* @param [in] index The index of the feature to retrieve.
+			* @param [out] pFeatureId The feature id.
+			* @param [out] pFeatureValue The feature value.
+			* @return Returns 0 if successful, otherwise returns a negative value.
+			*/
+			virtual int GetFeature(int index, int* pFeatureId, float* pFeatureValue) const = 0;
+		};
+
+		/**
+		* The CCharacterCluster class represents a character cluster generated from the buffered character items.
+		*
+		*/
+		class DLR_API CCharacterCluster
+		{
+		public:
+			/**
+			 * Destructor
+			 */
+			virtual ~CCharacterCluster() {};
+
+			/**
+			* Gets the character value of the cluster.
+			*
+			* @return Returns the character value of the cluster.
+			*/
+			virtual char GetCharacter() const = 0;
+
+			/**
+			* Gets the mean of the cluster.
+			*
+			* @return Returns the mean of the cluster.
+			*/
+			virtual const CBufferedCharacterItem* GetMean() const = 0;
+		};
+
+		/**
+		* The CBufferedCharacterItemSet class represents a set of buffered character item.
+		*
+		*/
+		class DLR_API CBufferedCharacterItemSet
+		{
+		protected:
+			/**
+			 * Destructor
+			 */
+			virtual ~CBufferedCharacterItemSet() {};
+
+		public:
+			/**
+			* Gets the number of items in the buffered item set.
+			*
+			* @return Returns the number of items in the buffered item set.
+			*
+			*/
+			virtual int GetItemsCount() const = 0;
+
+			/**
+			* Gets a pointer to the CBufferedCharacterItem object at the specified index.
+			*
+			* @param [in] index The index of the item to retrieve.
+			*
+			* @return Returns a pointer to the CBufferedCharacterItem object at the specified index.
+			*
+			*/
+			virtual const CBufferedCharacterItem* GetItem(int index) const = 0;
+
+			/**
+			* Gets a pointer to the CBufferedCharacterItem object at the specified index.
+			*
+			* @param [in] index The index of the item to retrieve.
+			*
+			* @return Returns a pointer to the CBufferedCharacterItem object at the specified index.
+			*
+			*/
+			virtual const CBufferedCharacterItem* operator[](int index) const = 0;
+
+			/**
+			* Increases the reference count of the CBufferedCharacterItemSet object.
+			*
+			* @return An object of CBufferedCharacterItemSet.
+			*/
+			virtual CBufferedCharacterItemSet* Retain() = 0;
+
+			/**
+			* Decreases the reference count of the CBufferedCharacterItemSet object.
+			*
+			*/
+			virtual void Release() = 0;
+
+			/**
+			* Gets the number of character clusters in the buffered item set.
+			*
+			* @return Returns the number of character clusters in the buffered item set.
+			*
+			*/
+			virtual int GetCharacterClustersCount() const = 0;
+
+			/**
+			* Gets the character cluster at the specified index.
+			*
+			* @param [in] index The index of the character cluster to retrieve.
+			*
+			* @return Returns the character cluster at the specified index.
+			*
+			*/
+			virtual const CCharacterCluster* GetCharacterCluster(int index) const = 0;
 		};
 
 	}

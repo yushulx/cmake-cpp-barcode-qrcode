@@ -25,7 +25,7 @@
 #include "DynamsoftCodeParser.h"
 #include "DynamsoftLicense.h"
 
-#define DCV_VERSION                  "2.2.10.0220"
+#define DCV_VERSION                  "2.2.30.0743"
 
 /**Enumeration section*/
 
@@ -945,6 +945,40 @@ namespace dynamsoft
 		};
 
 		/**
+		* The CBufferedItemsManager class is used to manager the buffered items.
+		*
+		*/
+		class CVR_API CBufferedItemsManager
+		{
+		public:
+			/**
+			* Destructor.
+			*/
+			virtual ~CBufferedItemsManager() {};
+
+			/**
+			* Sets the maximum number of buffered items.
+			*
+			* @param count The maximum number of buffered items.
+			*/
+			virtual void SetMaxBufferedItems(int count) = 0;
+
+			/**
+			* Gets the maximum number of buffered items.
+			*
+			* @return Returns the maximum number of buffered items.
+			*/
+			virtual int GetMaxBufferedItems() const = 0;
+
+			/**
+			* Gets the buffered character items.
+			*
+			* @return Returns the buffered character items.
+			*/
+			virtual dlr::CBufferedCharacterItemSet* GetBufferedCharacterItemSet() const = 0;
+		};
+
+		/**
 		* The CCaptureVisionRouter class is what a user uses to interact with image-processing and semantic-processing products in their applications.
 		* It accepts an image source and returns processing results which may contain Final results or Intermediate Results.
 		*/
@@ -1225,6 +1259,13 @@ namespace dynamsoft
 			*
 			*/
 			void ResumeCapturing();
+
+			/**
+			* Gets the buffered items manager.
+			*
+			* @return Returns a pointer to the `CBufferedItemsManager` object.
+			*/
+			CBufferedItemsManager* GetBufferedItemsManager();
 
 		private:
 			CCaptureVisionRouter(const CCaptureVisionRouter& r);

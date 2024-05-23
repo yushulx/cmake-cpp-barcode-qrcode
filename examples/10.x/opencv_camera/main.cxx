@@ -14,11 +14,14 @@
 
 #include "DynamsoftCaptureVisionRouter.h"
 #include "DynamsoftUtility.h"
+
 using namespace std;
 using namespace dynamsoft::license;
 using namespace dynamsoft::cvr;
+using namespace dynamsoft::dlr;
 using namespace dynamsoft::dbr;
 using namespace dynamsoft::utility;
+using namespace dynamsoft::basic_structures;
 using namespace cv;
 
 struct BarcodeResult
@@ -27,16 +30,181 @@ struct BarcodeResult
 	std::string value;
 	std::vector<cv::Point> localizationPoints;
 	int frameId;
+	string line;
+	std::vector<cv::Point> textLinePoints;
 };
 
 std::vector<BarcodeResult> barcodeResults;
 std::mutex barcodeResultsMutex;
 
+bool use_ocr = false;
+
+string settings = R"(
+{
+    "CaptureVisionTemplates": [
+        {
+            "Name": "ReadBarcode&AccompanyText",
+            "ImageROIProcessingNameArray": [
+                "roi-read-barcodes-only", "roi-read-text"
+            ]
+        }
+    ],
+    "TargetROIDefOptions": [
+        {
+            "Name": "roi-read-barcodes-only",
+            "TaskSettingNameArray": ["task-read-barcodes"]
+        },
+        {
+            "Name": "roi-read-text",
+            "TaskSettingNameArray": ["task-read-text"],
+            "Location": {
+                "ReferenceObjectFilter": {
+                    "ReferenceTargetROIDefNameArray": ["roi-read-barcodes-only"]
+                },
+                "Offset": {
+                    "MeasuredByPercentage": 1,
+                    "FirstPoint": [-20, -50],
+                    "SecondPoint": [150, -50],
+                    "ThirdPoint": [150, -5],
+                    "FourthPoint": [-20, -5]
+                }
+            }
+        }
+    ],
+    "CharacterModelOptions": [
+        {
+            "Name": "Letter"
+        }
+    ],
+    "ImageParameterOptions": [
+        {
+            "Name": "ip-read-text",
+            "TextureDetectionModes": [
+                {
+                    "Mode": "TDM_GENERAL_WIDTH_CONCENTRATION",
+                    "Sensitivity": 8
+                }
+            ],
+            "TextDetectionMode": {
+                "Mode": "TTDM_LINE",
+                "CharHeightRange": [
+                    20,
+                    1000,
+                    1
+                ],
+                "Direction": "HORIZONTAL",
+                "Sensitivity": 7
+            }
+        }
+    ],
+    "TextLineSpecificationOptions": [
+        {
+            "Name": "tls-11007",
+            "CharacterModelName": "Letter",
+            "CharHeightRange": [5, 1000, 1],
+            "BinarizationModes": [
+                {
+                    "BlockSizeX": 30,
+                    "BlockSizeY": 30,
+                    "Mode": "BM_LOCAL_BLOCK",
+                    "MorphOperation": "Close"
+                }
+            ]
+        }
+    ],
+    "BarcodeReaderTaskSettingOptions": [
+        {
+            "Name": "task-read-barcodes",
+            "BarcodeFormatIds": ["BF_ONED"]
+        }
+    ],
+    "LabelRecognizerTaskSettingOptions": [
+        {
+            "Name": "task-read-text",
+            "TextLineSpecificationNameArray": [
+                "tls-11007"
+            ],
+            "SectionImageParameterArray": [
+                {
+                    "Section": "ST_REGION_PREDETECTION",
+                    "ImageParameterName": "ip-read-text"
+                },
+                {
+                    "Section": "ST_TEXT_LINE_LOCALIZATION",
+                    "ImageParameterName": "ip-read-text"
+                },
+                {
+                    "Section": "ST_TEXT_LINE_RECOGNITION",
+                    "ImageParameterName": "ip-read-text"
+                }
+            ]
+        }
+    ]
+})";
+
 class MyCapturedResultReceiver : public CCapturedResultReceiver
 {
+	virtual void OnRecognizedTextLinesReceived(CRecognizedTextLinesResult *pResult) override
+	{
+		if (!use_ocr)
+		{
+			return;
+		}
+		std::lock_guard<std::mutex> lock(barcodeResultsMutex);
+		barcodeResults.clear();
+
+		const CFileImageTag *tag = dynamic_cast<const CFileImageTag *>(pResult->GetOriginalImageTag());
+
+		// cout << "File: " << tag->GetFilePath() << endl;
+
+		if (pResult->GetErrorCode() != EC_OK)
+		{
+			cout << "Error: " << pResult->GetErrorString() << endl;
+		}
+		else
+		{
+			int lCount = pResult->GetItemsCount();
+			for (int li = 0; li < lCount; ++li)
+			{
+				cout << "Result " << li + 1 << endl;
+
+				BarcodeResult result;
+
+				const CTextLineResultItem *textLine = pResult->GetItem(li);
+				CPoint *points = textLine->GetLocation().points;
+				result.line = textLine->GetText();
+				result.textLinePoints.push_back(cv::Point(points[0][0], points[0][1]));
+				result.textLinePoints.push_back(cv::Point(points[1][0], points[1][1]));
+				result.textLinePoints.push_back(cv::Point(points[2][0], points[2][1]));
+				result.textLinePoints.push_back(cv::Point(points[3][0], points[3][1]));
+
+				CBarcodeResultItem *barcodeResultItem = (CBarcodeResultItem *)textLine->GetReferenceItem();
+
+				points = barcodeResultItem->GetLocation().points;
+
+				result.type = barcodeResultItem->GetFormatString();
+				result.value = barcodeResultItem->GetText();
+				result.frameId = tag->GetImageId();
+				result.localizationPoints.push_back(cv::Point(points[0][0], points[0][1]));
+				result.localizationPoints.push_back(cv::Point(points[1][0], points[1][1]));
+				result.localizationPoints.push_back(cv::Point(points[2][0], points[2][1]));
+				result.localizationPoints.push_back(cv::Point(points[3][0], points[3][1]));
+
+				barcodeResults.push_back(result);
+
+				cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
+				cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
+				cout << ">>Line result " << li << ": " << textLine->GetText() << endl;
+			}
+		}
+	}
 
 	virtual void OnDecodedBarcodesReceived(CDecodedBarcodesResult *pResult) override
 	{
+		if (use_ocr)
+		{
+			return;
+		}
 		std::lock_guard<std::mutex> lock(barcodeResultsMutex);
 
 		if (pResult->GetErrorCode() != EC_OK)
@@ -95,8 +263,23 @@ public:
 	}
 };
 
-int main()
+int main(int argc, char *argv[])
 {
+	std::string ocr_arg;
+	for (int i = 1; i < argc; ++i)
+	{
+		std::string arg = argv[i];
+		if (arg == "--ocr" && i + 1 < argc)
+		{
+			ocr_arg = argv[++i];
+		}
+	}
+
+	if (!ocr_arg.empty() && ocr_arg == "true")
+	{
+		use_ocr = true;
+	}
+
 	cout << "Opening camera..." << endl;
 	VideoCapture capture(0); // open the first camera
 	if (!capture.isOpened())
@@ -127,15 +310,29 @@ int main()
 	cvr->SetInput(fetcher);
 
 	CMultiFrameResultCrossFilter *filter = new CMultiFrameResultCrossFilter;
-	filter->EnableResultCrossVerification(CRIT_BARCODE, true);
+	filter->EnableResultCrossVerification(CRIT_BARCODE | CRIT_TEXT_LINE, true);
 	// filter->EnableResultDeduplication(CRIT_BARCODE, true);
-	filter->SetDuplicateForgetTime(CRIT_BARCODE, 5000);
+	// filter->SetDuplicateForgetTime(CRIT_BARCODE | CRIT_TEXT_LINE, 5000);
 	cvr->AddResultFilter(filter);
 
 	CCapturedResultReceiver *capturedReceiver = new MyCapturedResultReceiver;
 	cvr->AddResultReceiver(capturedReceiver);
 
-	errorCode = cvr->StartCapturing(CPresetTemplate::PT_READ_BARCODES, false, errorMsg, 512);
+	if (strlen(errorMsg) > 0)
+	{
+		cout << "error:" << errorMsg << ", use_ocr" << use_ocr << endl;
+	}
+
+	if (use_ocr)
+	{
+		cvr->InitSettings(settings.c_str(), errorMsg, 512);
+		errorCode = cvr->StartCapturing("ReadBarcode&AccompanyText", false, errorMsg, 512);
+	}
+	else
+	{
+		errorCode = cvr->StartCapturing(CPresetTemplate::PT_READ_BARCODES, false, errorMsg, 512);
+	}
+
 	if (errorCode != EC_OK)
 	{
 		cout << "error:" << errorMsg << endl;
@@ -188,6 +385,20 @@ int main()
 									result.localizationPoints[0], cv::FONT_HERSHEY_SIMPLEX,
 									0.5, cv::Scalar(0, 255, 0), 2);
 					}
+
+					if (!result.line.empty() && !result.textLinePoints.empty())
+					{
+						for (size_t i = 0; i < result.textLinePoints.size(); ++i)
+						{
+							cv::line(frame, result.textLinePoints[i],
+									 result.textLinePoints[(i + 1) % result.textLinePoints.size()],
+									 cv::Scalar(0, 0, 255), 2);
+						}
+
+						cv::putText(frame, result.line,
+									result.textLinePoints[0], cv::FONT_HERSHEY_SIMPLEX,
+									0.5, cv::Scalar(0, 0, 255), 2);
+					}
 				}
 			}
 
@@ -196,7 +407,7 @@ int main()
 			if (key == 27 /*ESC*/)
 				break;
 		}
-		cvr->StopCapturing();
+		cvr->StopCapturing(false, true);
 	}
 
 	delete cvr, cvr = NULL;
