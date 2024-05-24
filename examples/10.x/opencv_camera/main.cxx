@@ -101,7 +101,9 @@ string settings = R"(
         {
             "Name": "tls-11007",
             "CharacterModelName": "Letter",
-            "CharHeightRange": [5, 1000, 1],
+            "StringRegExPattern": "(SerialNumber){(12)}|(LotNumber){(9)}",
+			"StringLengthRange": [9, 12],
+			"CharHeightRange": [5, 1000, 1],
             "BinarizationModes": [
                 {
                     "BlockSizeX": 30,
@@ -402,10 +404,32 @@ int main(int argc, char *argv[])
 				}
 			}
 
+			// Promt to change mode
+			cv::putText(frame, "Press 'm' to change mode",
+						cv::Point(10, 20), cv::FONT_HERSHEY_SIMPLEX,
+						0.5, cv::Scalar(0, 255, 0), 2);
+
 			imshow("1D/2D Barcode Scanner", frame);
 			int key = waitKey(1);
 			if (key == 27 /*ESC*/)
 				break;
+			else if (key == 'm' || key == 'M')
+			{
+				if (!use_ocr)
+				{
+					cvr->StopCapturing(false, true);
+					use_ocr = true;
+					cvr->InitSettings(settings.c_str(), errorMsg, 512);
+					errorCode = cvr->StartCapturing("ReadBarcode&AccompanyText", false, errorMsg, 512);
+				}
+				else
+				{
+					cvr->StopCapturing(false, true);
+					use_ocr = false;
+					cvr->ResetSettings();
+					errorCode = cvr->StartCapturing(CPresetTemplate::PT_READ_BARCODES, false, errorMsg, 512);
+				}
+			}
 		}
 		cvr->StopCapturing(false, true);
 	}
