@@ -71,23 +71,23 @@ if(WINDOWS)
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${PROJECT_SOURCE_DIR}/../sdk/platforms/win/bin/"      
     $<TARGET_FILE_DIR:main>)
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${PROJECT_SOURCE_DIR}/../sdk/DBR-PresetTemplates.json"
-    $<TARGET_FILE_DIR:main>/DBR-PresetTemplates.json)
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${PROJECT_SOURCE_DIR}/../sdk/DLR-PresetTemplates.json"
-    $<TARGET_FILE_DIR:main>/DLR-PresetTemplates.json)
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:main>/CharacterModel
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PROJECT_SOURCE_DIR}/../sdk/CharacterModel"
-    $<TARGET_FILE_DIR:main>/CharacterModel)
 endif()
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy
+"${PROJECT_SOURCE_DIR}/../sdk/DBR-PresetTemplates.json"
+$<TARGET_FILE_DIR:main>/DBR-PresetTemplates.json)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy
+"${PROJECT_SOURCE_DIR}/../sdk/DLR-PresetTemplates.json"
+$<TARGET_FILE_DIR:main>/DLR-PresetTemplates.json)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:main>/CharacterModel
+COMMAND ${CMAKE_COMMAND} -E copy_directory
+"${PROJECT_SOURCE_DIR}/../sdk/CharacterModel"
+$<TARGET_FILE_DIR:main>/CharacterModel)
 
 
 
