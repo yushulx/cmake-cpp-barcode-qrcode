@@ -1,3 +1,5 @@
 dist
 build
 .vscode
+.vs
+Debug
