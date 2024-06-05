@@ -131,6 +131,9 @@ This repository contains examples demonstrating how to utilize the **Dynamsoft B
     
     ![Raspberry Pi barcode QR detection](https://www.dynamsoft.com/codepool/img/2020/06/raspberry-pi-barcode-qr.png)
 
+- [Rust](./examples/9.x/rust/)
+
+    ![Rust Barcode Reader](https://www.dynamsoft.com/codepool/img/2024/06/rust-command-line-barcode-reader.jpg)
 
 ## Blog
 - [CMake: Build C++ Project for Windows, Linux and macOS](https://www.dynamsoft.com/codepool/cmake-cc-windows-linux-macos.html)
