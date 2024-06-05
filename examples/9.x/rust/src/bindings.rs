@@ -29,15 +29,3 @@ extern "C" {
     pub fn DBR_CreateInstance() -> *mut c_void;
     pub fn DBR_DestroyInstance(barcodeReader: *mut c_void); 
 }
-
-// pub fn create_dbr_instance() -> *mut c_void {
-//     unsafe {
-//         DBR_CreateInstance() 
-//     }
-// }
-
-// pub fn destroy_dbr_instance(instance_ptr: *mut c_void) {
-//     unsafe {
-//         DBR_DestroyInstance(instance_ptr);
-//     }
-// }
