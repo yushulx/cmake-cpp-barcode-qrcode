@@ -26,3 +26,6 @@ This project showcases a simple command-line barcode reader built using Rust and
     ```
 
     ![Rust Barcode Reader](https://www.dynamsoft.com/codepool/img/2024/06/rust-command-line-barcode-reader.jpg)
+
+## Blog
+[How to Build a Command-Line Barcode Reader with Rust and C++ Barcode SDK](https://www.dynamsoft.com/codepool/rust-barcode-reader-command-line.html)
