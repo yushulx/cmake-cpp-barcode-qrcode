@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 fn main() {
     // Determine the target operating system
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
+    println!("OUT_DIR: {}..............................................", env::var("OUT_DIR").unwrap());
     println!("cargo:warning=OS: {}..............................................", target_os);
 
     match target_os.as_str() {

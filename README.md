@@ -135,6 +135,10 @@ This repository contains examples demonstrating how to utilize the **Dynamsoft B
 
     ![Rust Barcode Reader](https://www.dynamsoft.com/codepool/img/2024/06/rust-command-line-barcode-reader.jpg)
 
+- [WebP](./examples/9.x/webp/)
+
+    ![Read barcodes from WebP image](https://www.dynamsoft.com/codepool/img/2024/06/cpp-decode-webp-barcode-qr-code.jpg)
+
 ## Blog
 - [CMake: Build C++ Project for Windows, Linux and macOS](https://www.dynamsoft.com/codepool/cmake-cc-windows-linux-macos.html)
 - [My First C/C++ App Built with CMake on Windows](https://www.dynamsoft.com/codepool/cc-barcode-app-cmake-windows.html)
