@@ -34,7 +34,7 @@ extern "C"
     CAMERA_LIB_API void close_camera();
     CAMERA_LIB_API ImageData get_frame();
     CAMERA_LIB_API void release_image(ImageData *image);
-    CAMERA_LIB_API void display_image(const ImageData *image);
+    CAMERA_LIB_API void display_image(const char *name, const ImageData *image);
     CAMERA_LIB_API void draw_line(ImageData *image, int x1, int y1, int x2, int y2, int thickness, int r, int g, int b);
     CAMERA_LIB_API void draw_text(ImageData *image, const char *text, int x, int y, int font_scale, int thickness, int r, int g, int b);
     CAMERA_LIB_API int wait_key(int delay);

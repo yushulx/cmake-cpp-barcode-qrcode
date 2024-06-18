@@ -47,13 +47,13 @@ void release_image(ImageData *image)
     }
 }
 
-void display_image(const ImageData *image)
+void display_image(const char *name, const ImageData *image)
 {
     if (image && image->data)
     {
         int type = image->pixel_format == PIXEL_FORMAT_BGR ? CV_8UC3 : CV_8UC1;
         cv::Mat frame(image->height, image->width, type, image->data, image->stride);
-        cv::imshow("Frame", frame);
+        cv::imshow(name, frame);
     }
 }
 
