@@ -135,7 +135,6 @@ int main()
             {
                 CFileImageTag tag(nullptr, 0, 0);
                 tag.SetImageId(i);
-                printf("width: %d, height: %d, stride: %d\n", frame.width, frame.height, frame.stride);
                 CImageData data(frame.height * frame.stride,
                                 frame.data,
                                 frame.width,
@@ -162,13 +161,13 @@ int main()
                     }
                 }
 
-                display_image("1D/2D Barcode Scanner", &frame);
+                display_frame("1D/2D Barcode Scanner", &frame);
                 if (wait_key(30) >= 0)
                 { // Add a delay and check for key press
-                    release_image(&frame);
+                    release_frame(&frame);
                     break; // Exit the loop if any key is pressed
                 }
-                release_image(&frame);
+                release_frame(&frame);
             }
         }
         close_camera();

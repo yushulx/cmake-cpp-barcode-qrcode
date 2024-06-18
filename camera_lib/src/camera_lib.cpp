@@ -38,7 +38,7 @@ ImageData get_frame()
     return image;
 }
 
-void release_image(ImageData *image)
+void release_frame(ImageData *image)
 {
     if (image->data)
     {
@@ -47,7 +47,7 @@ void release_image(ImageData *image)
     }
 }
 
-void display_image(const char *name, const ImageData *image)
+void display_frame(const char *name, const ImageData *image)
 {
     if (image && image->data)
     {
