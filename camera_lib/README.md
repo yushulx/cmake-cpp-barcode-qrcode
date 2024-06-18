@@ -22,7 +22,13 @@
 6. Configure `src/CMakeLists.txt` to link against the OpenCV library.
     
     ```cmake
-    target_link_libraries(camera_lib opencv_core480 opencv_highgui480 opencv_videoio480 opencv_imgproc480)
+    if(WIN32)
+        link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../lib/windows)
+        set(OPENCV_LIBS opencv_core480 opencv_highgui480 opencv_videoio480 opencv_imgproc480)
+    elseif(UNIX)
+        link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../lib/linux)
+        set(OPENCV_LIBS opencv_core opencv_highgui opencv_videoio opencv_imgproc)
+    endif()
     ```
 7. Build the camera application:
 

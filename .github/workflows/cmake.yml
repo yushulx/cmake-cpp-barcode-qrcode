@@ -71,41 +71,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    # Download OpenCV source code
-    - name: Download OpenCV source code
-      run: |
-        git clone https://github.com/opencv/opencv.git
-        cd opencv
-        git checkout 4.x  # Or specify a specific version
-
-    # Configure and build OpenCV
-    - name: Configure OpenCV
-      run: |
-        cmake -S opencv -B opencv/build -DBUILD_SHARED_LIBS=ON -DBUILD_opencv_world=OFF -DBUILD_opencv_apps=OFF -DBUILD_opencv_calib3d=OFF -DBUILD_opencv_dnn=OFF -DBUILD_opencv_features2d=OFF -DBUILD_opencv_flann=OFF -DBUILD_opencv_gapi=OFF -DBUILD_opencv_ml=OFF -DBUILD_opencv_objdetect=OFF -DBUILD_opencv_photo=OFF -DBUILD_opencv_stitching=OFF -DBUILD_opencv_video=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
-
-    - name: Build OpenCV
-      run: cmake --build opencv/build --config ${{ env.BUILD_TYPE }}
-
-    # Package the built shared libraries
-    - name: Package Shared Libraries
-      run: |
-        mkdir -p packages/${{ matrix.os }}
-        cp -r opencv/build/lib packages/${{ matrix.os }}/
-      if: runner.os == 'Linux' || runner.os == 'macOS'
-
-    - name: Package Shared Libraries for Windows
-      run: |
-        mkdir -p packages/${{ matrix.os }}
-        cp -r opencv/build/Release/*.dll packages/${{ matrix.os }}/
-      if: runner.os == 'Windows'
-
-    # Upload artifacts
-    - name: Upload Shared Libraries
-      uses: actions/upload-artifact@v2
-      with:
-        name: shared-libraries-${{ matrix.os }}
-        path: packages/${{ matrix.os }}
     
     - name: Set up QEMU
       if: runner.os == 'Linux'
