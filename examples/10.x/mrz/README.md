@@ -20,8 +20,12 @@ This C/C++ sample demonstrates how to implement **MRZ (Machine Readable Zone)** 
     mkdir build
     cd build
     cmake ..
+    # For OpenCV
+    # cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DENABLE_OPENCV=TRUE ..
     cmake --build .
     ```
+    
+    
     
  ## Blog
  [Passport MRZ Recognition with Dynamsoft C++ OCR SDK](https://www.dynamsoft.com/codepool/passport-mrz-recognition-cpp-windows-linux.html)

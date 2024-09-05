@@ -211,6 +211,11 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 
 	virtual void OnParsedResultsReceived(CParsedResult *pResult)
 	{
+		if (pResult == nullptr)
+		{
+			return;
+		}
+
 		const CFileImageTag *tag = dynamic_cast<const CFileImageTag *>(pResult->GetOriginalImageTag());
 
 		if (pResult->GetErrorCode() != EC_OK)
@@ -232,6 +237,8 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 		}
 
 		cout << endl;
+
+		pResult->Release();
 	}
 };
 

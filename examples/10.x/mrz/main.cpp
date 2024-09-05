@@ -240,18 +240,23 @@ int main(int argc, char *argv[])
 		float costTime = 0.0;
 		int errorCode = 0;
 
-		CCapturedResult *result = cvr->Capture(pszImageFile);
-		CParsedResult *results = result->GetParsedResult();
-
-		if (results)
+		CCapturedResult *captureResult = cvr->Capture(pszImageFile);
+		if (captureResult)
 		{
-			for (int i = 0; i < results->GetItemsCount(); i++)
+			CParsedResult *parsedResult = captureResult->GetParsedResult();
+			if (parsedResult)
 			{
-				const CParsedResultItem *item = results->GetItem(i);
-				MRZResult result;
-				result.FromParsedResultItem(item);
-				cout << result.ToString() << endl;
+				for (int i = 0; i < parsedResult->GetItemsCount(); i++)
+				{
+					const CParsedResultItem *item = parsedResult->GetItem(i);
+					MRZResult result;
+					result.FromParsedResultItem(item);
+					cout << result.ToString() << endl;
+				}
+				parsedResult->Release();
 			}
+
+			captureResult->Release();
 		}
 	}
 
