@@ -164,23 +164,24 @@ public:
 	}
 };
 
-struct LineResult
+struct TextResult
 {
-	string line;
+	int id;
+	MRZResult info;
 	std::vector<cv::Point> textLinePoints;
 };
 
-std::vector<LineResult> lineResults;
-std::mutex lineResultsMutex;
+std::vector<TextResult> textResults;
+std::mutex textResultsMutex;
 
 class MyCapturedResultReceiver : public CCapturedResultReceiver
 {
 	virtual void OnRecognizedTextLinesReceived(CRecognizedTextLinesResult *pResult) override
 	{
-		std::lock_guard<std::mutex> lock(lineResultsMutex);
-		lineResults.clear();
+		std::lock_guard<std::mutex> lock(textResultsMutex);
+		textResults.clear();
 
-		const CFileImageTag *tag = dynamic_cast<const CFileImageTag *>(pResult->GetOriginalImageTag());
+		const CImageTag *tag = pResult->GetOriginalImageTag();
 
 		if (pResult->GetErrorCode() != EC_OK)
 		{
@@ -193,18 +194,18 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 			{
 				cout << "Result " << li + 1 << endl;
 
-				LineResult result;
+				TextResult result;
 
 				const CTextLineResultItem *textLine = pResult->GetItem(li);
 				CPoint *points = textLine->GetLocation().points;
-				result.line = textLine->GetText();
 				result.textLinePoints.push_back(cv::Point(points[0][0], points[0][1]));
 				result.textLinePoints.push_back(cv::Point(points[1][0], points[1][1]));
 				result.textLinePoints.push_back(cv::Point(points[2][0], points[2][1]));
 				result.textLinePoints.push_back(cv::Point(points[3][0], points[3][1]));
 
 				cout << ">>Line result " << li << ": " << textLine->GetText() << endl;
-				lineResults.push_back(result);
+				result.id = tag->GetImageId();
+				textResults.push_back(result);
 			}
 		}
 	}
@@ -216,7 +217,7 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 			return;
 		}
 
-		const CFileImageTag *tag = dynamic_cast<const CFileImageTag *>(pResult->GetOriginalImageTag());
+		const CImageTag *tag = pResult->GetOriginalImageTag();
 
 		if (pResult->GetErrorCode() != EC_OK)
 		{
@@ -225,7 +226,6 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 		else
 		{
 			int lCount = pResult->GetItemsCount();
-			cout << "Parsed " << lCount << " MRZ Zones" << endl;
 			for (int i = 0; i < lCount; i++)
 			{
 				const CParsedResultItem *item = pResult->GetItem(i);
@@ -233,6 +233,12 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 				MRZResult result;
 				result.FromParsedResultItem(item);
 				cout << result.ToString() << endl;
+
+				if (textResults[0].id == tag->GetImageId())
+				{
+					std::lock_guard<std::mutex> lock(textResultsMutex);
+					textResults[0].info = result;
+				}
 			}
 		}
 
@@ -257,8 +263,15 @@ public:
 	}
 };
 
+void drawText(Mat &img, const char *text, int x, int y)
+{
+	putText(img, text, Point(x, y), cv::FONT_HERSHEY_SIMPLEX,
+			0.5, cv::Scalar(0, 0, 255), 1);
+}
+
 int main(int argc, char *argv[])
 {
+	bool captured = false;
 	cout << "Opening camera..." << endl;
 	VideoCapture capture(0); // open the first camera
 	if (!capture.isOpened())
@@ -330,10 +343,10 @@ int main(int argc, char *argv[])
 			fetcher->MyAddImageToBuffer(&data);
 
 			{
-				std::lock_guard<std::mutex> lock(lineResultsMutex);
-				for (const auto &result : lineResults)
+				std::lock_guard<std::mutex> lock(textResultsMutex);
+				for (const auto &result : textResults)
 				{
-					if (!result.line.empty() && !result.textLinePoints.empty())
+					if (!result.textLinePoints.empty())
 					{
 						for (size_t i = 0; i < result.textLinePoints.size(); ++i)
 						{
@@ -342,15 +355,47 @@ int main(int argc, char *argv[])
 									 cv::Scalar(0, 0, 255), 2);
 						}
 
-						cv::putText(frame, result.line,
-									result.textLinePoints[0], cv::FONT_HERSHEY_SIMPLEX,
-									0.5, cv::Scalar(0, 0, 255), 2);
+						int x = 20;
+						int y = 40;
+
+						MRZResult mrzResult = result.info;
+						string msg = "Document Type: " + mrzResult.docType;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Document ID: " + mrzResult.docId;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Surname: " + mrzResult.surname;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Given Name: " + mrzResult.givenname;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Nationality: " + mrzResult.nationality;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Issuing Country or Organization: " + mrzResult.issuer;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Gender: " + mrzResult.gender;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Date of Birth(YYMMDD): " + mrzResult.dateOfBirth;
+						drawText(frame, msg.c_str(), x, y);
+						y += 20;
+						msg = "Expiration Date(YYMMDD): " + mrzResult.dateOfExpiry;
+
+						if (captured)
+						{
+							captured = false;
+							imshow("Captured Frame", frame);
+						}
 					}
 				}
 			}
 
 			// Promt to change mode
-			cv::putText(frame, "Press 'ESC' to quit",
+			cv::putText(frame, "Press 'ESC' to quit. Press 'C' to capture.",
 						cv::Point(10, 20), cv::FONT_HERSHEY_SIMPLEX,
 						0.5, cv::Scalar(0, 255, 0), 2);
 
@@ -358,6 +403,10 @@ int main(int argc, char *argv[])
 			int key = waitKey(1);
 			if (key == 27 /*ESC*/)
 				break;
+			else if (key == char('c'))
+			{
+				captured = true;
+			}
 		}
 		cvr->StopCapturing(false, true);
 	}
