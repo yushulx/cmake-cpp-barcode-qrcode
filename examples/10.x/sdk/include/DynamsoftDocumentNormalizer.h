@@ -19,7 +19,7 @@
 #endif
 #include "DynamsoftCore.h"
 
-#define DDN_VERSION                  "2.2.10.0220"
+#define DDN_VERSION                  "2.4.10.1677"
 
 /**Enums section*/
 
@@ -76,8 +76,14 @@ typedef struct SimplifiedDocumentNormalizerSettings
 	*/
 	int scaleDownThreshold;
 
+	/** The minimum ratio between the target quadrilateral area and the total image area. Only those exceeding this value (measured in percentages) will be outputted.*/
+	int minQuadrilateralAreaRatio;
+
+	/**Set the number of documents expected to be detected.*/
+	int expectedDocumentsCount;
+
 	/**Reserved for future use.*/
-	char reserved[512];
+	char reserved[504];
 }SimplifiedDocumentNormalizerSettings;
 
 #pragma pack(pop)

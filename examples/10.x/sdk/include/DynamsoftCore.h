@@ -1,5 +1,5 @@
 #pragma once
-#define DYNAMSOFT_CORE_VERSION "3.2.30.0743"
+#define DYNAMSOFT_CORE_VERSION "3.2.40.1677"
 
 /**Enumeration section*/
 
@@ -712,8 +712,11 @@ enum IntermediateResultUnitType : unsigned long long
 	/**The type of the IntermediateResult is "short lines".*/
 	IRUT_SHORT_LINES = 1 << 27,
 
+	/**The type of the IntermediateResult is "text line groups".*/
+	IRUT_RAW_TEXT_LINES = 1LL << 28,
+
 	/**The type of the IntermediateResult is "all".*/
-	IRUT_ALL = 0xFFFFFFF
+	IRUT_ALL = 0xFFFFFFFFFFFFFFFF
 };
 
 /**
@@ -1832,6 +1835,13 @@ namespace dynamsoft
 			*
 			*/
 			virtual void Release() = 0;
+
+			/**
+			 * Clone the captured result item.
+			 *
+			 * @return Returns a pointer to a copy of the captured result item.
+			 */
+			virtual CCapturedResultItem* Clone() const = 0;
 		};
 
 		/**
@@ -3134,6 +3144,16 @@ namespace dynamsoft
 			*
 			*/
 			virtual void OnUnitResultReceived(CIntermediateResultUnit *pUnit, const IntermediateResultExtraInfo* info) = 0;
+
+			/**
+			* Called by function modules when a task result has been received.
+			*
+			* @param [in] pResult A pointer to the CIntermediateResult object that contains several result units.
+			* @param [in] info A pointer to the IntermediateResultExtraInfo object that contains the extra info of intermediate result.
+			*
+			* @remark It is for internal calls of function modules such as DynamsoftBarcodeReader, DynamsoftLabelRecognizer and DynamsoftDocumentNormalizer.
+			*/
+			virtual void OnTaskResultsReceivedInner(CIntermediateResult *pResult, const IntermediateResultExtraInfo* info) = 0;
 		};
 	}
 }

@@ -15,7 +15,7 @@
 #endif
 #include "DynamsoftCore.h"
 
-#define DCP_VERSION "2.2.10.0220"
+#define DCP_VERSION "2.4.10.1677"
 /**
  * @enum MappingStatus 
  *
@@ -229,6 +229,16 @@ namespace dynamsoft
 			*
 			*/
 			virtual void Release() = 0;
+
+			/**
+			 * Adds a specific item to the array in the parsed result.
+			 *
+			 * @param [in] item The specific item to add.
+			 *
+			 * @return Returns value indicating whether the addition was successful or not.
+			 *
+			 */
+			virtual int AddItem(const CParsedResultItem* item) = 0;
 		};
 
 		class CodeParserInner;

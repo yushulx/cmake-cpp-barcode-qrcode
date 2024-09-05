@@ -25,7 +25,7 @@
 #include "DynamsoftCodeParser.h"
 #include "DynamsoftLicense.h"
 
-#define DCV_VERSION                  "2.2.30.0743"
+#define DCV_VERSION                  "2.4.10.1677"
 
 /**Enumeration section*/
 
@@ -307,6 +307,16 @@ namespace dynamsoft
 			 * @remark Do not forget to release the memory pointed to by the returned pointer.
 			 */
 			virtual dcp::CParsedResult* GetParsedResult() const = 0;
+
+			/**
+			 * Add a specific item to the array in the captured result.
+			 *
+			 * @param [in] item The specific item to add.
+			 *
+			 * @return Returns value indicating whether the addition was successful or not.
+			 *
+			 */
+			virtual int AddItem(const CCapturedResultItem* item) = 0;
 		};
 
 		/**
@@ -588,10 +598,36 @@ namespace dynamsoft
 			*/
 			virtual void OnComplementedBarcodeImageUnitReceived(dbr::intermediate_results::CComplementedBarcodeImageUnit *pResult, const IntermediateResultExtraInfo* info);
 
+			/**
+			* Called when raw text lines have been received.
+			*
+			* @param [in] pResult A pointer to the CRawTextLinesUnit object that contains the result.
+			* @param [in] info A pointer to the IntermediateResultExtraInfo object that contains the extra info of intermediate result.
+			*
+			*/
+			virtual void OnRawTextLinesReceived(dlr::intermediate_results::CRawTextLinesUnit *pResult, const IntermediateResultExtraInfo* info);
+
 
 			virtual const char* GetEncryptedString();
 
+			/**
+			* Called when a intermediate result unit has been received.
+			*
+			* @param [in] pUnit A pointer to the CIntermediateResultUnit object.
+			* @param [in] info A pointer to the IntermediateResultExtraInfo object that contains the extra info of intermediate result.
+			*
+			*/
 			virtual void OnUnitResultReceived(CIntermediateResultUnit *pUnit, const IntermediateResultExtraInfo* info) final;
+
+			/**
+			* Called by function modules when a task result has been received.
+			*
+			* @param [in] pResult A pointer to the CIntermediateResult object that contains several result units.
+			* @param [in] info A pointer to the IntermediateResultExtraInfo object that contains the extra info of intermediate result.
+			*
+			* @remark It is for internal calls of function modules such as DynamsoftBarcodeReader, DynamsoftLabelRecognizer and DynamsoftDocumentNormalizer.
+			*/
+			virtual void OnTaskResultsReceivedInner(CIntermediateResult *pResult, const IntermediateResultExtraInfo* info) final;
 		};
 
 		/**
@@ -1227,10 +1263,10 @@ namespace dynamsoft
 			*
 			* @param [in] waitForRemainingTasks Indicates whether to wait for the remaining tasks to complete before returning. The default value is true.
 			*
-			* @param [in] waitForThreadExit Indicates whether to wait for the capture process to complete before returning. The default value is false.
+			* @param [in] waitForThreadExit Indicates whether to wait for the capture process to complete before returning. The default value is true.
 			*
 			*/
-			void StopCapturing(bool waitForRemainingTasks = true, bool waitForThreadExit = false);
+			void StopCapturing(bool waitForRemainingTasks = true, bool waitForThreadExit = true);
 
 			/**
 			* Frees the memory allocated for a string.

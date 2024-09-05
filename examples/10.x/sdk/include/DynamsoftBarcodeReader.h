@@ -24,7 +24,7 @@ typedef void* HANDLE;
 #endif
 #include "DynamsoftCore.h"
 
-#define DBR_VERSION "10.2.10.0220"
+#define DBR_VERSION "10.4.10.1677"
 
 /**Enumeration section*/
 
@@ -467,6 +467,13 @@ namespace dynamsoft
 			CQRCodeDetails(int _rows = -1, int _columns = -1, QRCodeErrorCorrectionLevel _level = QRECL_ERROR_CORRECTION_H,
 				int _version = -1, int _model = -1, int _mode = -1, int _page = -1, int _totalPage = -1, int _parityData = -1);
 
+			CQRCodeDetails& operator=(const CQRCodeDetails& other);
+
+			/**
+			 * Destructor for the CQRCodeDetails class.
+			 */
+			~CQRCodeDetails();
+
 			/*The row count of the barcode*/
 			int rows;
 
@@ -495,6 +502,12 @@ namespace dynamsoft
 			The parity data is a value obtained by XORing byte by byte the ASCII/JIS values of 
 			all the original input data before division into symbol blocks.*/
 			unsigned char parityData;
+
+			int dataMaskPattern;
+
+			unsigned char* codewords;
+
+			int codewordsCount;
 		};
 
 		/**
@@ -1112,7 +1125,7 @@ namespace dynamsoft
 				 * @param format The format of the deformation resisted barcode.
 				 */
 				CDeformationResistedBarcode(const CImageData* img, FreeImageFunc freeImageFunc, const CQuadrilateral& location, BarcodeFormat format);
-				
+
 				/**
 				 * Gets the deformation resisted barcode image.
 				 *
@@ -1397,6 +1410,15 @@ namespace dynamsoft
 			 */
 			virtual bool IsMirrored() const = 0;
 
+			/**
+			 * Sets the location of the barcode item.
+			 *
+			 * @param [in] location The location of the barcode item.
+			 *
+			 * @return Returns 0 if success, otherwise an error code.
+			 *
+			 */
+			virtual int SetLocation(const CQuadrilateral& location) = 0;
 		};
 
 		/**
@@ -1512,6 +1534,16 @@ namespace dynamsoft
 			*
 			*/
 			virtual void Release() = 0;
+
+			/**
+			 * Adds a specific item to the array in the decoded barcodes result.
+			 *
+			 * @param [in] item The specific item to add.
+			 *
+			 * @return Returns value indicating whether the addition was successful or not.
+			 *
+			 */
+			virtual int AddItem(const CBarcodeResultItem* item) = 0;
 		};
 
 		/**
