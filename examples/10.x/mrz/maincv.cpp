@@ -1,4 +1,3 @@
-// Refer to https://github.com/Dynamsoft/barcode-reader-c-cpp-samples/blob/main/Samples/VideoDecoding/VideoDecoding.cpp
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
@@ -8,7 +7,6 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-// Include headers of DynamsoftCaptureVisionRouter SDK
 #include <iostream>
 #include <string>
 
