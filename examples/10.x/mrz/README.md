@@ -1,6 +1,8 @@
 # Desktop Passport MRZ Scanner for Windows and Linux
 This C/C++ sample demonstrates how to implement **MRZ (Machine Readable Zone)** recognition using the Dynamsoft Capture Vision SDK.
 
+https://github.com/user-attachments/assets/71bbe660-eabc-4d27-965f-1e03871df974
+
 ## Prerequisites
 - [CMake](https://cmake.org/download/)
 - [OpenCV 4.5.0](https://opencv.org/releases/)
