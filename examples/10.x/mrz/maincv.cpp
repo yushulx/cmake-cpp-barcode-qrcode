@@ -192,8 +192,6 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 			int lCount = pResult->GetItemsCount();
 			for (int li = 0; li < lCount; ++li)
 			{
-				cout << "Result " << li + 1 << endl;
-
 				TextResult result;
 
 				const CTextLineResultItem *textLine = pResult->GetItem(li);
@@ -203,7 +201,6 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 				result.textLinePoints.push_back(cv::Point(points[2][0], points[2][1]));
 				result.textLinePoints.push_back(cv::Point(points[3][0], points[3][1]));
 
-				cout << ">>Line result " << li << ": " << textLine->GetText() << endl;
 				result.id = tag->GetImageId();
 				textResults.push_back(result);
 			}
@@ -241,8 +238,6 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 				}
 			}
 		}
-
-		cout << endl;
 
 		pResult->Release();
 	}
