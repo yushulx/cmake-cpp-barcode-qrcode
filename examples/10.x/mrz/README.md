@@ -24,7 +24,8 @@ This C/C++ sample demonstrates how to implement **MRZ (Machine Readable Zone)** 
     # cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DENABLE_OPENCV=TRUE ..
     cmake --build .
     ```
-    
+
+    ![desktop cpp MRZ scanner](https://www.dynamsoft.com/codepool/img/2024/09/desktop-cpp-mrz-scanner.png)
     
     
  ## Blog
