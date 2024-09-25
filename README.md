@@ -2,7 +2,7 @@
 This repository contains examples demonstrating how to utilize the **Dynamsoft Barcode Reader SDK** to build barcode and QR code detection applications with C++ and CMake on **Windows**, **Linux**, **macOS**, and **Raspberry Pi**.
 
 ## Prerequisites
-- Obtain a [30-day free trial license](https://www.dynamsoft.com/customer/license/trialLicense/) for Dynamsoft Barcode Reader. Update the following code in `main.cxx`:
+- Obtain a [30-day free trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform) for Dynamsoft Barcode Reader. Update the following code in `main.cxx`:
 
     ```cpp
     DBR_InitLicense(license, errorMsgBuffer, 512);
