@@ -3,7 +3,7 @@ The project demonstrates how to build a Windows desktop barcode reader app using
 
 ## Getting Started
 1. Import the project to Visual Studio 2022.
-2. Request a [free trial license](https://www.dynamsoft.com/customer/license/trialLicense?product=dbr) and update the license key in the `BarcodeReader.cpp` file.
+2. Request a [free trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform) and update the license key in the `BarcodeReader.cpp` file.
 
     ```cpp
     const char* pLicense = "LICENSE-KEY";

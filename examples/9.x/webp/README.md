@@ -12,7 +12,7 @@ This repository provides examples showcasing how to easily decode QR codes and o
 - [libwebp-1.2.1](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.1.tar.gz)
 
 ## License Key
-Get a [30-day free trial license key](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr) and save it in a file named `license.txt`.
+Get a [30-day free trial license key](https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform) and save it in a file named `license.txt`.
 
 ## Usage
 

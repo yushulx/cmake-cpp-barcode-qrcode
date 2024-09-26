@@ -253,8 +253,8 @@ class MyCapturedResultReceiver : public CCapturedResultReceiver
 class MyVideoFetcher : public CImageSourceAdapter
 {
 public:
-	MyVideoFetcher(){};
-	~MyVideoFetcher(){};
+	MyVideoFetcher() {};
+	~MyVideoFetcher() {};
 	bool HasNextImageToFetch() const override
 	{
 		return true;
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 	int iRet = -1;
 	char szErrorMsg[256];
 	// Initialize license.
-	// Request a trial from https://www.dynamsoft.com/customer/license/trialLicense?product=dbr
+	// Request a trial from https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform
 	iRet = CLicenseManager::InitLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==", szErrorMsg, 256);
 	if (iRet != EC_OK)
 	{

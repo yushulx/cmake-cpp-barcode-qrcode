@@ -28,7 +28,7 @@ The sample demonstrates how to build a C/C++ barcode reader app on `Raspberry Pi
     ```
 
 ## Build and Run
-1. Get a [30-day trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr&source=github) of [Dynamsoft Barcode Reader](https://www.dynamsoft.com/barcode-reader/overview/) and update the following code in `main.cxx`:
+1. Get a [30-day trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform) of [Dynamsoft Barcode Reader](https://www.dynamsoft.com/barcode-reader/overview/) and update the following code in `main.cxx`:
 
     ```cpp
     iRet = reader.InitLicense("LICENSE-KEY");

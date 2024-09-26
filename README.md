@@ -139,6 +139,10 @@ This repository contains examples demonstrating how to utilize the **Dynamsoft B
 
     ![Read barcodes from WebP image](https://www.dynamsoft.com/codepool/img/2024/06/cpp-decode-webp-barcode-qr-code.jpg)
 
+- [Qt](./examples/9.x/qt/)
+
+    ![Qt GUI barcode reader](https://www.dynamsoft.com/codepool/img/2021/08/barcode-scanner-webcam-qcamera.png)
+
 ## Blog
 - [CMake: Build C++ Project for Windows, Linux and macOS](https://www.dynamsoft.com/codepool/cmake-cc-windows-linux-macos.html)
 - [My First C/C++ App Built with CMake on Windows](https://www.dynamsoft.com/codepool/cc-barcode-app-cmake-windows.html)

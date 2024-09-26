@@ -3,7 +3,7 @@ This project showcases a simple command-line barcode reader built using Rust and
 
 ## Prequisites
 - [Rust](https://www.rust-lang.org/tools/install)
-- [Dynamsoft Barcode Reader Trial License](https://www.dynamsoft.com/customer/license/trialLicense/?product=dbr)
+- [Dynamsoft Barcode Reader Trial License](https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform)
 
 ## Usage
 1. Set the license key in `src/main.rs`:
