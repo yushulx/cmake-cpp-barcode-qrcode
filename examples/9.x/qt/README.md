@@ -39,3 +39,6 @@ A desktop barcode reader app built with [Dynamsoft C++ Barcode SDK](https://www.
         ./BarcodeReader
         ```
  
+## Blog
+- [How to Develop a Desktop GUI Barcode Reader with Qt and C/C++](https://www.dynamsoft.com/codepool/qt-desktop-barcode-reader.html)
+- [How to Build a Desktop Barcode Scanner with Webcam Support Using Qt QCamera](https://www.dynamsoft.com/codepool/barcode-scanner-webcam-qt-qcamera.html)
