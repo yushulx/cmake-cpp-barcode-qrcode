@@ -172,44 +172,46 @@ int main(int argc, char *argv[])
 		int errorCode = 0;
 
 		string path = string(pszImageFile);
-		if (endsWith(path, ".pdf") || endsWith(path, ".tif"))
-		{
-			fileFetcher->SetFile(pszImageFile);
-			errorCode = cvr->StartCapturing(CPresetTemplate::PT_READ_BARCODES, true, errorMsg, 512);
-		}
-		else
-		{
-			CCapturedResult *result = cvr->Capture(pszImageFile, CPresetTemplate::PT_READ_BARCODES);
+		fileFetcher->SetFile(pszImageFile);
+		errorCode = cvr->StartCapturing(CPresetTemplate::PT_READ_BARCODES, true, errorMsg, 512);
+		// if (endsWith(path, ".pdf") || endsWith(path, ".tif"))
+		// {
+		// 	fileFetcher->SetFile(pszImageFile);
+		// 	errorCode = cvr->StartCapturing(CPresetTemplate::PT_READ_BARCODES, true, errorMsg, 512);
+		// }
+		// else
+		// {
+		// 	CCapturedResult *result = cvr->Capture(pszImageFile, CPresetTemplate::PT_READ_BARCODES);
 
-			if (result->GetErrorCode() != 0)
-			{
-				cout << "Error: " << result->GetErrorCode() << "," << result->GetErrorString() << endl;
-			}
-			CDecodedBarcodesResult *barcodeResult = result->GetDecodedBarcodesResult();
-			if (barcodeResult == nullptr || barcodeResult->GetItemsCount() == 0)
-			{
-				cout << "No barcode found." << endl;
-			}
-			else
-			{
-				int barcodeResultItemCount = barcodeResult->GetItemsCount();
-				cout << "Decoded " << barcodeResultItemCount << " barcodes" << endl;
+		// 	if (result->GetErrorCode() != 0)
+		// 	{
+		// 		cout << "Error: " << result->GetErrorCode() << "," << result->GetErrorString() << endl;
+		// 	}
+		// 	CDecodedBarcodesResult *barcodeResult = result->GetDecodedBarcodesResult();
+		// 	if (barcodeResult == nullptr || barcodeResult->GetItemsCount() == 0)
+		// 	{
+		// 		cout << "No barcode found." << endl;
+		// 	}
+		// 	else
+		// 	{
+		// 		int barcodeResultItemCount = barcodeResult->GetItemsCount();
+		// 		cout << "Decoded " << barcodeResultItemCount << " barcodes" << endl;
 
-				for (int j = 0; j < barcodeResultItemCount; j++)
-				{
-					const CBarcodeResultItem *barcodeResultItem = barcodeResult->GetItem(j);
-					cout << "Result " << j + 1 << endl;
-					cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
-					cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
-				}
-			}
-			if (barcodeResult)
-				barcodeResult->Release();
+		// 		for (int j = 0; j < barcodeResultItemCount; j++)
+		// 		{
+		// 			const CBarcodeResultItem *barcodeResultItem = barcodeResult->GetItem(j);
+		// 			cout << "Result " << j + 1 << endl;
+		// 			cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
+		// 			cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
+		// 		}
+		// 	}
+		// 	if (barcodeResult)
+		// 		barcodeResult->Release();
 
-			result->Release();
-		}
+		// 	result->Release();
+		// }
 	}
 
-	delete cvr, cvr = NULL, listener, capturedReceiver;
+	delete cvr, cvr = NULL, listener, capturedReceiver, fileFetcher;
 	return 0;
 }
