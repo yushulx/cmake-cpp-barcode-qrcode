@@ -24,7 +24,62 @@ using namespace std;
 using namespace dynamsoft::license;
 using namespace dynamsoft::cvr;
 using namespace dynamsoft::dbr;
+using namespace dynamsoft::utility;
 using namespace dynamsoft::basic_structures;
+
+class MyCapturedResultReceiver : public CCapturedResultReceiver
+{
+
+	virtual void OnDecodedBarcodesReceived(CDecodedBarcodesResult *pResult) override
+	{
+		if (pResult->GetErrorCode() != EC_OK)
+		{
+			cout << "Error: " << pResult->GetErrorString() << endl;
+		}
+		else
+		{
+			auto tag = pResult->GetOriginalImageTag();
+			if (tag)
+			{
+				cout << "ImageID:" << tag->GetImageId() << endl;
+				CFileImageTag *fileTag = (CFileImageTag *)tag;
+				cout << "Page number:" << fileTag->GetPageNumber() << endl;
+			}
+			int count = pResult->GetItemsCount();
+			cout << "Decoded " << count << " barcodes" << endl;
+			for (int i = 0; i < count; i++)
+			{
+				const CBarcodeResultItem *barcodeResultItem = pResult->GetItem(i);
+				if (barcodeResultItem != NULL)
+				{
+					cout << "Result " << i + 1 << endl;
+					cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
+					cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
+				}
+			}
+		}
+
+		cout << endl;
+	}
+};
+
+class MyImageSourceStateListener : public CImageSourceStateListener
+{
+private:
+	CCaptureVisionRouter *m_router;
+
+public:
+	MyImageSourceStateListener(CCaptureVisionRouter *router)
+	{
+		m_router = router;
+	}
+
+	virtual void OnImageSourceStateReceived(ImageSourceState state)
+	{
+		if (state == ISS_EXHAUSTED)
+			m_router->StopCapturing();
+	}
+};
 
 bool GetImagePath(char *pImagePath)
 {
@@ -60,6 +115,17 @@ bool GetImagePath(char *pImagePath)
 	}
 }
 
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+	// Check if the suffix length is greater than the string length
+	if (suffix.size() > str.size())
+	{
+		return false;
+	}
+	// Compare the end of the string with the suffix
+	return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 int main(int argc, char *argv[])
 {
 	printf("*************************************************\r\n");
@@ -89,6 +155,14 @@ int main(int argc, char *argv[])
 
 	char pszImageFile[512] = {0};
 	bool bExit = false;
+	CImageSourceStateListener *listener = new MyImageSourceStateListener(cvr);
+	CFileFetcher *fileFetcher = new CFileFetcher();
+	cvr->SetInput(fileFetcher);
+
+	CCapturedResultReceiver *capturedReceiver = new MyCapturedResultReceiver;
+	cvr->AddResultReceiver(capturedReceiver);
+	cvr->AddImageSourceStateListener(listener);
+
 	while (1)
 	{
 		bExit = GetImagePath(pszImageFile);
@@ -97,36 +171,45 @@ int main(int argc, char *argv[])
 		float costTime = 0.0;
 		int errorCode = 0;
 
-		CCapturedResult *result = cvr->Capture(pszImageFile, CPresetTemplate::PT_READ_BARCODES);
-
-		if (result->GetErrorCode() != 0)
+		string path = string(pszImageFile);
+		if (endsWith(path, ".pdf") || endsWith(path, ".tif"))
 		{
-			cout << "Error: " << result->GetErrorCode() << "," << result->GetErrorString() << endl;
-		}
-		CDecodedBarcodesResult *barcodeResult = result->GetDecodedBarcodesResult();
-		if (barcodeResult == nullptr || barcodeResult->GetItemsCount() == 0)
-		{
-			cout << "No barcode found." << endl;
+			fileFetcher->SetFile(pszImageFile);
+			errorCode = cvr->StartCapturing(CPresetTemplate::PT_READ_BARCODES, true, errorMsg, 512);
 		}
 		else
 		{
-			int barcodeResultItemCount = barcodeResult->GetItemsCount();
-			cout << "Decoded " << barcodeResultItemCount << " barcodes" << endl;
+			CCapturedResult *result = cvr->Capture(pszImageFile, CPresetTemplate::PT_READ_BARCODES);
 
-			for (int j = 0; j < barcodeResultItemCount; j++)
+			if (result->GetErrorCode() != 0)
 			{
-				const CBarcodeResultItem *barcodeResultItem = barcodeResult->GetItem(j);
-				cout << "Result " << j + 1 << endl;
-				cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
-				cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
+				cout << "Error: " << result->GetErrorCode() << "," << result->GetErrorString() << endl;
 			}
-		}
-		if (barcodeResult)
-			barcodeResult->Release();
+			CDecodedBarcodesResult *barcodeResult = result->GetDecodedBarcodesResult();
+			if (barcodeResult == nullptr || barcodeResult->GetItemsCount() == 0)
+			{
+				cout << "No barcode found." << endl;
+			}
+			else
+			{
+				int barcodeResultItemCount = barcodeResult->GetItemsCount();
+				cout << "Decoded " << barcodeResultItemCount << " barcodes" << endl;
 
-		result->Release();
+				for (int j = 0; j < barcodeResultItemCount; j++)
+				{
+					const CBarcodeResultItem *barcodeResultItem = barcodeResult->GetItem(j);
+					cout << "Result " << j + 1 << endl;
+					cout << "Barcode Format: " << barcodeResultItem->GetFormatString() << endl;
+					cout << "Barcode Text: " << barcodeResultItem->GetText() << endl;
+				}
+			}
+			if (barcodeResult)
+				barcodeResult->Release();
+
+			result->Release();
+		}
 	}
 
-	delete cvr, cvr = NULL;
+	delete cvr, cvr = NULL, listener, capturedReceiver;
 	return 0;
 }
