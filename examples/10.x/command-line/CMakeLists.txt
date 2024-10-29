@@ -4,6 +4,8 @@ MESSAGE( STATUS "PROJECT_NAME: " ${PROJECT_NAME} )
 
 if (CMAKE_HOST_WIN32)
     set(WINDOWS 1)
+elseif(CMAKE_HOST_APPLE)
+    set(MACOS 1)
 elseif(CMAKE_HOST_UNIX)
     set(LINUX 1)
 endif()
@@ -51,7 +53,13 @@ elseif(LINUX)
     if (CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
         MESSAGE( STATUS "Link directory: ${PROJECT_SOURCE_DIR}/../sdk/platforms/linux/" )
         link_directories("${PROJECT_SOURCE_DIR}/../sdk/platforms/linux/")
+    elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64) 
+        MESSAGE( STATUS "Link directory: ${PROJECT_SOURCE_DIR}/../sdk/platforms/aarch64/" )
+        link_directories("${PROJECT_SOURCE_DIR}/../sdk/platforms/aarch64/") 
     endif()
+elseif(MACOS)
+    MESSAGE( STATUS "Link directory: ${PROJECT_SOURCE_DIR}/../sdk/platforms/macos/" )
+    link_directories("${PROJECT_SOURCE_DIR}/../sdk/platforms/macos/") 
 endif()
 include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/../sdk/include/")
 
@@ -70,10 +78,22 @@ if(WINDOWS)
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${PROJECT_SOURCE_DIR}/../sdk/platforms/win/bin/"      
     $<TARGET_FILE_DIR:main>)
-else()
+elseif(LINUX)
+    if (CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/../sdk/platforms/linux/"      
+        $<TARGET_FILE_DIR:main>)
+    elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64) 
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/../sdk/platforms/aarch64/"      
+        $<TARGET_FILE_DIR:main>)
+    endif()
+elseif(MACOS)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PROJECT_SOURCE_DIR}/../sdk/platforms/linux/"      
+    "${PROJECT_SOURCE_DIR}/../sdk/platforms/macos/"      
     $<TARGET_FILE_DIR:main>)
 endif()
 
