@@ -83,7 +83,7 @@ int main()
         FrameData frame = camera.CaptureFrame();
         if (frame.rgbData) {
             window.ShowFrame(frame.rgbData, frame.width, frame.height);
-            camera.ReleaseFrame(frame);
+            ReleaseFrame(frame);
         }
     }
 
