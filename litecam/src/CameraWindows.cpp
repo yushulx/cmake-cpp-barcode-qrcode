@@ -42,16 +42,6 @@ const wchar_t *GetSubtypeName(const GUID &subType)
     return guidString;
 }
 
-void Camera::ReleaseFrame(FrameData &frame)
-{
-    if (frame.rgbData)
-    {
-        delete[] frame.rgbData;
-        frame.rgbData = nullptr;
-        frame.size = 0;
-    }
-}
-
 Camera::Camera() : reader(nullptr), frameWidth(640), frameHeight(480), initialized(false)
 {
     InitializeMediaFoundation();

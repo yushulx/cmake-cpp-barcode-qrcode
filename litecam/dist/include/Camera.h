@@ -29,12 +29,6 @@
 #include <wrl/client.h>
 #include <dshow.h>
 
-#pragma comment(lib, "mfplat.lib")
-#pragma comment(lib, "mf.lib")
-#pragma comment(lib, "mfreadwrite.lib")
-#pragma comment(lib, "mfuuid.lib")
-
-using Microsoft::WRL::ComPtr;
 #elif __linux__
 #include <linux/videodev2.h>
 #include <fcntl.h>
@@ -147,6 +141,17 @@ struct CAMERA_API CaptureDeviceInfo
 
 // Exported functions
 CAMERA_API std::vector<CaptureDeviceInfo> ListCaptureDevices();
+CAMERA_API void ReleaseFrame(FrameData &frame);
+
+void ReleaseFrame(FrameData &frame)
+{
+    if (frame.rgbData)
+    {
+        delete[] frame.rgbData;
+        frame.rgbData = nullptr;
+        frame.size = 0;
+    }
+}
 
 // Camera class
 class CAMERA_API Camera
@@ -165,7 +170,6 @@ public:
 
     std::vector<MediaTypeInfo> ListSupportedMediaTypes();
     FrameData CaptureFrame();
-    void ReleaseFrame(FrameData &frame);
     bool SetResolution(int width, int height);
 
     uint32_t frameWidth;
@@ -173,7 +177,7 @@ public:
 
 private:
 #ifdef _WIN32
-    ComPtr<IMFSourceReader> reader;
+    void *reader;
 
     bool initialized;
     void InitializeMediaFoundation();

@@ -4,16 +4,6 @@
 #include <string>
 #include <map>
 
-void Camera::ReleaseFrame(FrameData &frame)
-{
-    if (frame.rgbData)
-    {
-        delete[] frame.rgbData;
-        frame.rgbData = nullptr;
-        frame.size = 0;
-    }
-}
-
 bool Camera::Open(int cameraIndex)
 {
     std::string devicePath = "/dev/video" + std::to_string(cameraIndex);

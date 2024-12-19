@@ -141,6 +141,17 @@ struct CAMERA_API CaptureDeviceInfo
 
 // Exported functions
 CAMERA_API std::vector<CaptureDeviceInfo> ListCaptureDevices();
+CAMERA_API void ReleaseFrame(FrameData &frame);
+
+void ReleaseFrame(FrameData &frame)
+{
+    if (frame.rgbData)
+    {
+        delete[] frame.rgbData;
+        frame.rgbData = nullptr;
+        frame.size = 0;
+    }
+}
 
 // Camera class
 class CAMERA_API Camera
@@ -159,7 +170,6 @@ public:
 
     std::vector<MediaTypeInfo> ListSupportedMediaTypes();
     FrameData CaptureFrame();
-    void ReleaseFrame(FrameData &frame);
     bool SetResolution(int width, int height);
 
     uint32_t frameWidth;

@@ -100,7 +100,7 @@ int main()
                 }
             }
 
-            camera.ReleaseFrame(frame);
+            ReleaseFrame(frame);
         }
 
         camera.Release();

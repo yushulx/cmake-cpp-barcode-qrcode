@@ -84,7 +84,7 @@ int main()
                 saveFrameAsJPEG(frame.rgbData, camera.frameWidth, camera.frameHeight, filename);
             }
 
-            camera.ReleaseFrame(frame);
+            ReleaseFrame(frame);
 #ifdef _WIN32
             Sleep(500);
 #else
@@ -127,7 +127,7 @@ int main()
                 window.DrawText("Hello, Camera!", 50, 50, 24, textColor);
             }
 
-            camera.ReleaseFrame(frame);
+            ReleaseFrame(frame);
         }
 
         camera.Release();
