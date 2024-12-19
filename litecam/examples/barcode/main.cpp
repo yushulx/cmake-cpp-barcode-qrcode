@@ -73,25 +73,30 @@ int main()
                                 0, 0);
                 CCapturedResult *result = cvr->Capture(&data, "");
 
-                CDecodedBarcodesResult *barcodeResult = result->GetDecodedBarcodesResult();
-                if (barcodeResult)
+                if (result)
                 {
-                    int count = barcodeResult->GetItemsCount();
-                    for (int i = 0; i < count; i++)
+                    CDecodedBarcodesResult *barcodeResult = result->GetDecodedBarcodesResult();
+                    if (barcodeResult)
                     {
-                        const CBarcodeResultItem *barcodeResultItem = barcodeResult->GetItem(i);
-                        CPoint *points = barcodeResultItem->GetLocation().points;
+                        int count = barcodeResult->GetItemsCount();
+                        for (int i = 0; i < count; i++)
+                        {
+                            const CBarcodeResultItem *barcodeResultItem = barcodeResult->GetItem(i);
+                            CPoint *points = barcodeResultItem->GetLocation().points;
 
-                        std::vector<std::pair<int, int>> corners = {
-                            {points[0][0], points[0][1]},
-                            {points[1][0], points[1][1]},
-                            {points[2][0], points[2][1]},
-                            {points[3][0], points[3][1]}};
+                            std::vector<std::pair<int, int>> corners = {
+                                {points[0][0], points[0][1]},
+                                {points[1][0], points[1][1]},
+                                {points[2][0], points[2][1]},
+                                {points[3][0], points[3][1]}};
 
-                        window.DrawContour(corners);
+                            window.DrawContour(corners);
 
-                        window.DrawText(barcodeResultItem->GetText(), points[0][0], points[0][1], 24, textColor);
+                            window.DrawText(barcodeResultItem->GetText(), points[0][0], points[0][1], 24, textColor);
+                        }
                     }
+
+                    result->Release();
                 }
             }
 
