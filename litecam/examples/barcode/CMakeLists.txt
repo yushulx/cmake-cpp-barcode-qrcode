@@ -29,6 +29,8 @@ if(WIN32)
     $<TARGET_FILE_DIR:BarcodeScanner>)
 elseif(UNIX)
     add_custom_command(TARGET BarcodeScanner POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:BarcodeScanner>)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../examples/10.x/sdk/platforms/linux/      
+    $<TARGET_FILE_DIR:BarcodeScanner>)
 endif()
 
