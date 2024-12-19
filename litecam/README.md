@@ -2,6 +2,10 @@
 
 LiteCam is a lightweight, cross-platform library for capturing RGB frames from cameras and displaying them. Designed with simplicity and ease of integration in mind, LiteCam supports Windows and Linux platforms.
 
+## Linux Virtual Machine Demo
+https://github.com/user-attachments/assets/908b0a6e-4e3b-4064-8921-22229f41a9b7
+
+
 ## Features
 
 - Capture RGB frames from video devices.
