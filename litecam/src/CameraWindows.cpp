@@ -5,6 +5,13 @@
 #include <map>
 #include <set>
 
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "mf.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
+
+using Microsoft::WRL::ComPtr;
+
 struct GUIDComparator
 {
     bool operator()(const GUID &lhs, const GUID &rhs) const
@@ -123,7 +130,8 @@ bool Camera::Open(int cameraIndex)
     if (FAILED(hr))
         return false;
 
-    hr = MFCreateSourceReaderFromMediaSource(mediaSource.Get(), nullptr, &reader);
+    ComPtr<IMFSourceReader> mfReader;
+    hr = MFCreateSourceReaderFromMediaSource(mediaSource.Get(), nullptr, &mfReader);
     if (FAILED(hr))
         return false;
 
@@ -139,7 +147,10 @@ bool Camera::Open(int cameraIndex)
 
     if (SUCCEEDED(hr))
     {
-        hr = reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr, mediaType.Get());
+        hr = mfReader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr, mediaType.Get());
+
+        reader = reinterpret_cast<void *>(mfReader.Detach());
+
         if (SUCCEEDED(hr))
         {
             return true;
@@ -153,7 +164,8 @@ void Camera::Release()
 {
     if (reader)
     {
-        reader.Reset();
+        ComPtr<IMFSourceReader> mfReader(static_cast<IMFSourceReader *>(reader));
+        reader = nullptr;
     }
 }
 
@@ -166,11 +178,11 @@ std::vector<MediaTypeInfo> Camera::ListSupportedMediaTypes()
 
     // Use a set to store unique media types
     std::set<std::tuple<uint32_t, uint32_t, std::wstring>> uniqueMediaTypes;
-
+    IMFSourceReader *mfReader = reinterpret_cast<IMFSourceReader *>(reader);
     for (DWORD i = 0;; i++)
     {
         ComPtr<IMFMediaType> mediaType;
-        HRESULT hr = reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, i, &mediaType);
+        HRESULT hr = mfReader->GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, i, &mediaType);
         if (FAILED(hr))
             break;
 
@@ -212,7 +224,9 @@ bool Camera::SetResolution(int width, int height)
 
     if (SUCCEEDED(hr))
     {
-        hr = reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr, mediaType.Get());
+        IMFSourceReader *mfReader = reinterpret_cast<IMFSourceReader *>(reader);
+
+        hr = mfReader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr, mediaType.Get());
         if (SUCCEEDED(hr))
         {
             frameWidth = width;
@@ -226,6 +240,7 @@ bool Camera::SetResolution(int width, int height)
 
 FrameData Camera::CaptureFrame()
 {
+
     HRESULT hr;
     DWORD streamIndex, flags;
     LONGLONG timestamp;
@@ -237,7 +252,8 @@ FrameData Camera::CaptureFrame()
     frame.rgbData = nullptr;
 
     // Read a sample from the media source
-    hr = reader->ReadSample(
+    IMFSourceReader *mfReader = reinterpret_cast<IMFSourceReader *>(reader);
+    hr = mfReader->ReadSample(
         MF_SOURCE_READER_FIRST_VIDEO_STREAM,
         0,
         &streamIndex,

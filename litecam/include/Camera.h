@@ -29,12 +29,6 @@
 #include <wrl/client.h>
 #include <dshow.h>
 
-#pragma comment(lib, "mfplat.lib")
-#pragma comment(lib, "mf.lib")
-#pragma comment(lib, "mfreadwrite.lib")
-#pragma comment(lib, "mfuuid.lib")
-
-using Microsoft::WRL::ComPtr;
 #elif __linux__
 #include <linux/videodev2.h>
 #include <fcntl.h>
@@ -173,7 +167,7 @@ public:
 
 private:
 #ifdef _WIN32
-    ComPtr<IMFSourceReader> reader;
+    void *reader;
 
     bool initialized;
     void InitializeMediaFoundation();
