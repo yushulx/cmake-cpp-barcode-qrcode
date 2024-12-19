@@ -23,9 +23,6 @@ target_include_directories(BarcodeScanner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../
 target_link_libraries(BarcodeScanner litecam ${DBR_LIBS})
 
 if(WIN32)
-
-    
-
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_custom_command(TARGET BarcodeScanner POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
