@@ -34,34 +34,34 @@ set(EXECUTABLE_SOURCES
 )
 
 # Add the Camera shared library
-add_library(Camera SHARED ${LIBRARY_SOURCES})
+add_library(litecam SHARED ${LIBRARY_SOURCES})
 
 # Set include directories for the Camera library
-target_include_directories(Camera PUBLIC ${INCLUDE_DIR})
+target_include_directories(litecam PUBLIC ${INCLUDE_DIR})
 
 # Define the CAMERA_EXPORTS macro for the shared library
-target_compile_definitions(Camera PRIVATE CAMERA_EXPORTS)
+target_compile_definitions(litecam PRIVATE CAMERA_EXPORTS)
 
 # Platform-specific dependencies for the Camera library
 if (UNIX AND NOT APPLE)
     find_package(X11 REQUIRED)
     if (X11_FOUND)
-        target_include_directories(Camera PUBLIC ${X11_INCLUDE_DIR})
-        target_link_libraries(Camera PRIVATE ${X11_LIBRARIES} pthread)
+        target_include_directories(litecam PUBLIC ${X11_INCLUDE_DIR})
+        target_link_libraries(litecam PRIVATE ${X11_LIBRARIES} pthread)
     endif()
 elseif (APPLE)
     find_library(COCOA_LIBRARY Cocoa)
     find_library(AVFOUNDATION_LIBRARY AVFoundation)
-    target_link_libraries(Camera PRIVATE ${AVFOUNDATION_LIBRARY})
+    target_link_libraries(litecam PRIVATE ${AVFOUNDATION_LIBRARY})
 elseif (WIN32)
-    target_link_libraries(Camera PRIVATE ole32 uuid mfplat mf mfreadwrite mfuuid)
+    target_link_libraries(litecam PRIVATE ole32 uuid mfplat mf mfreadwrite mfuuid)
 endif()
 
 # Add the camera_capture executable
 add_executable(camera_capture ${EXECUTABLE_SOURCES})
 
 # Link the Camera library to the executable
-target_link_libraries(camera_capture PRIVATE Camera)
+target_link_libraries(camera_capture PRIVATE litecam)
 
 # Include the shared library's headers in the executable
 target_include_directories(camera_capture PRIVATE ${INCLUDE_DIR})
