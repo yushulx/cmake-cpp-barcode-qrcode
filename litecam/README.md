@@ -31,7 +31,12 @@ https://github.com/user-attachments/assets/908b0a6e-4e3b-4064-8921-22229f41a9b7
 - Development libraries for:
   - Video4Linux2 (libv4l2)
   - X11 (libX11)
-
+    
+    ```bash
+    sudo apt update
+    sudo apt install libx11-dev
+    ```
+    
 ## Installation
 
 1. Clone the repository:
