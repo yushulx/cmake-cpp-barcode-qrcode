@@ -118,4 +118,6 @@ int main()
 - **`void DrawContour(const std::vector<std::pair<int, int>> &points)`**: Draws contours on the frame.
 - **`void DrawText(const std::string &text, int x, int y, int fontSize, const Color &color)`**: Draws text on the frame.
 
-
+## Blog
+- [Building a Lightweight C++ Camera Library for Barcode Scanning on Linux](https://www.dynamsoft.com/codepool/linux-cpp-camera-barcode-scanner.html)
+- [How to Implement Camera Preview with Windows Media Foundation API in C++](https://www.dynamsoft.com/codepool/windows-cpp-camera-barcode-scanner.html)
