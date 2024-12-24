@@ -22,10 +22,15 @@ elseif (UNIX AND NOT APPLE)
         src/CameraPreviewLinux.cpp
     )
 elseif (APPLE)
+    # Ensure that Objective-C++ source files are compiled as Objective-C++
     set(LIBRARY_SOURCES
         src/CameraMacOS.mm
         src/CameraPreviewMacOS.mm
     )
+    set_source_files_properties(src/CameraMacOS.mm src/CameraPreviewMacOS.mm PROPERTIES COMPILE_FLAGS "-x objective-c++")
+
+    # Set main.cpp to be treated as Objective-C++
+    set_source_files_properties(src/main.cpp PROPERTIES COMPILE_FLAGS "-x objective-c++")
 endif()
 
 # Define source files for the executable
@@ -50,9 +55,19 @@ if (UNIX AND NOT APPLE)
         target_link_libraries(litecam PRIVATE ${X11_LIBRARIES} pthread)
     endif()
 elseif (APPLE)
-    find_library(COCOA_LIBRARY Cocoa)
-    find_library(AVFOUNDATION_LIBRARY AVFoundation)
-    target_link_libraries(litecam PRIVATE ${AVFOUNDATION_LIBRARY})
+    find_library(COCOA_LIBRARY Cocoa REQUIRED)
+    find_library(AVFOUNDATION_LIBRARY AVFoundation REQUIRED)
+    find_library(COREMEDIA_LIBRARY CoreMedia REQUIRED)
+    find_library(COREVIDEO_LIBRARY CoreVideo REQUIRED)
+    find_library(OBJC_LIBRARY objc REQUIRED)  # Add the Objective-C runtime library
+
+    target_link_libraries(litecam PRIVATE 
+        ${COCOA_LIBRARY} 
+        ${AVFOUNDATION_LIBRARY} 
+        ${COREMEDIA_LIBRARY} 
+        ${COREVIDEO_LIBRARY} 
+        ${OBJC_LIBRARY}  # Link the Objective-C runtime
+    )
 elseif (WIN32)
     target_link_libraries(litecam PRIVATE ole32 uuid mfplat mf mfreadwrite mfuuid)
 endif()
@@ -65,3 +80,14 @@ target_link_libraries(camera_capture PRIVATE litecam)
 
 # Include the shared library's headers in the executable
 target_include_directories(camera_capture PRIVATE ${INCLUDE_DIR})
+
+# For macOS, link against the Cocoa framework
+if (APPLE)
+    target_link_libraries(camera_capture PRIVATE 
+        ${COCOA_LIBRARY} 
+        ${AVFOUNDATION_LIBRARY} 
+        ${COREMEDIA_LIBRARY} 
+        ${COREVIDEO_LIBRARY} 
+        ${OBJC_LIBRARY}  # Link the Objective-C runtime
+    )
+endif()

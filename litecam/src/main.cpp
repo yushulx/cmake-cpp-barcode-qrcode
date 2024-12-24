@@ -5,6 +5,10 @@
 
 #include <cstdlib> // For wcstombs
 
+#if __APPLE__
+#include <Cocoa/Cocoa.h>
+#endif
+
 void PrintMediaTypes(const std::vector<MediaTypeInfo> &mediaTypes)
 {
     printf("Supported Media Types:\n");
@@ -63,8 +67,6 @@ int main()
     std::cout << "Capturing frames...\n";
     if (camera.Open(0))
     {
-
-        camera.SetResolution(640, 480);
         auto mediaTypes = camera.ListSupportedMediaTypes();
         if (mediaTypes.empty())
         {

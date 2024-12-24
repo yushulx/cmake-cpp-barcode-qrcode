@@ -41,9 +41,6 @@ struct Buffer
     void *start;
     size_t length;
 };
-
-#elif __APPLE__
-#include <AVFoundation/AVFoundation.h>
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,6 +160,9 @@ public:
 #elif __linux__
     Camera() : fd(-1), frameWidth(640), frameHeight(480), buffers(nullptr), bufferCount(0) {}
     ~Camera() { Release(); }
+#elif __APPLE__
+    Camera() noexcept; // Add noexcept to match the implementation
+    ~Camera();
 #endif
 
     bool Open(int cameraIndex);
@@ -197,6 +197,7 @@ private:
 
 #ifdef __APPLE__
     void *captureSession; // AVFoundation session object
+    void *videoOutput;
 #endif
 };
 
