@@ -9,8 +9,8 @@
 #elif __linux__
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#elif __APPLE__
-#include <Cocoa/Cocoa.h>
+// #elif __APPLE__
+// #include <Cocoa/Cocoa.h>
 #endif
 
 // Export macro for shared library
@@ -66,6 +66,7 @@ private:
 #elif __APPLE__
     // Add macOS-specific members (e.g., NSWindow or CGContext)
     void *nsWindow; // Use proper macOS data structures here
+    void *contentView;
 #endif
 };
 
