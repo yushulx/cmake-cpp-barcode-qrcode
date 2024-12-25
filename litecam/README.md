@@ -1,6 +1,6 @@
 # LiteCam
 
-LiteCam is a lightweight, cross-platform library for capturing RGB frames from cameras and displaying them. Designed with simplicity and ease of integration in mind, LiteCam supports Windows and Linux platforms.
+LiteCam is a lightweight, cross-platform library for capturing RGB frames from cameras and displaying them. Designed with simplicity and ease of integration in mind, LiteCam supports **Windows**, **Linux** and **macOS** platforms.
 
 ## Demo Video
 - Linux Virtual Machine
@@ -24,6 +24,7 @@ LiteCam is a lightweight, cross-platform library for capturing RGB frames from c
 
 - **Windows**: Uses Media Foundation for video capture.
 - **Linux**: Uses Video4Linux (V4L2) and X11 for video capture and rendering.
+- **macOS**: Uses AVFoundation for video capture.
 
 ## Requirements
 
@@ -43,7 +44,11 @@ LiteCam is a lightweight, cross-platform library for capturing RGB frames from c
     sudo apt update
     sudo apt install libx11-dev
     ```
-    
+
+### macOS
+- Xcode
+- Development libraries for AVFoundation (included with macOS)    
+
 ## Installation
 
 1. Clone the repository:
@@ -102,15 +107,16 @@ int main()
 ### API Overview
 
 #### Camera
-
+- **`std::vector<CaptureDeviceInfo> ListCaptureDevices()`**: Lists available video capture devices.
 - **`bool Open(int cameraIndex)`**: Opens the camera with the specified index.
+- **`bool SetResolution(int width, int height)`**: Sets the resolution for the camera.
+- **`std::vector<MediaTypeInfo> ListSupportedMediaTypes()`**: Lists supported media types.
 - **`FrameData CaptureFrame()`**: Captures a single RGB frame.
 - **`void ReleaseFrame(FrameData &frame)`**: Releases the memory allocated for a frame.
 - **`void Release()`**: Closes the camera and releases resources.
 - **`void saveFrameAsJPEG(const char *filename, const unsigned char *rgbData, int width, int height)`**: Saves the frame as a JPEG image.
 
 #### CameraWindow
-
 - **`bool Create()`**: Initializes and creates a window.
 - **`void Show()`**: Displays the window.
 - **`bool WaitKey(char key)`**: Waits for user input; returns `false` if the specified key is pressed or the window is closed.
