@@ -13,6 +13,9 @@ struct CameraContentViewImpl {
     std::vector<unsigned char> rgbData;
     int frameWidth = 0;
     int frameHeight = 0;
+    int x = 0;
+    int y = 0;
+    int fontSize = 0; 
     std::vector<std::pair<int, int>> contourPoints;
     std::string displayText;
     CameraWindow::Color textColor;
@@ -66,6 +69,9 @@ struct CameraContentViewImpl {
             color:(const CameraWindow::Color&)color {
     impl->displayText = text;
     impl->textColor = color;
+    impl->x = x;
+    impl->y = y;
+    impl->fontSize = fontSize;
     [self setNeedsDisplay:YES];
 }
 
@@ -73,9 +79,28 @@ struct CameraContentViewImpl {
     [super drawRect:dirtyRect];
 
     CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
+    NSRect bounds = [self bounds];
     if (impl->rgbData.empty() || impl->frameWidth == 0 || impl->frameHeight == 0) {
         return;
     }
+
+    // Calculate scaling factors
+    CGFloat scaleX = bounds.size.width / impl->frameWidth;
+    CGFloat scaleY = bounds.size.height / impl->frameHeight;
+
+    // Optionally, maintain aspect ratio by using the minimum scale factor
+    CGFloat scale = MIN(scaleX, scaleY);
+
+    // Calculate offsets to center the content if aspect ratios differ
+    CGFloat offsetX = (bounds.size.width - (impl->frameWidth * scale)) / 2.0;
+    CGFloat offsetY = (bounds.size.height - (impl->frameHeight * scale)) / 2.0;
+
+    
+    CGContextSaveGState(context); // Save state before transformations
+
+    // Apply scaling and translation
+    CGContextTranslateCTM(context, offsetX, offsetY);
+    CGContextScaleCTM(context, scale, scale);
 
     // Draw the RGB frame
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
@@ -89,31 +114,50 @@ struct CameraContentViewImpl {
     CGDataProviderRelease(provider);
     CGColorSpaceRelease(colorSpace);
 
-    // Draw Contour
     if (!impl->contourPoints.empty()) {
-        CGContextSetLineWidth(context, 2.0);
-        CGContextSetStrokeColorWithColor(context, [[NSColor greenColor] CGColor]);
+        CGContextSaveGState(context); // Save state before drawing contour
 
-        CGContextMoveToPoint(context, impl->contourPoints[0].first, impl->frameHeight - impl->contourPoints[0].second);
+        CGContextSetLineWidth(context, 3.0 / scale); // Adjust line width based on scale
+        CGContextSetStrokeColorWithColor(context, [[NSColor yellowColor] CGColor]); // Changed color to yellow
+
+        // Move to the first point
+        auto firstPoint = impl->contourPoints[0];
+        CGContextMoveToPoint(context, firstPoint.first, impl->frameHeight - firstPoint.second);
+
+        // Draw lines to subsequent points
         for (size_t i = 1; i < impl->contourPoints.size(); ++i) {
-            CGContextAddLineToPoint(context, impl->contourPoints[i].first, impl->frameHeight - impl->contourPoints[i].second);
+            auto point = impl->contourPoints[i];
+            CGContextAddLineToPoint(context, point.first, impl->frameHeight - point.second);
         }
+
         CGContextClosePath(context);
         CGContextStrokePath(context);
+
+        CGContextRestoreGState(context); // Restore state after drawing contour
+    } else {
+        NSLog(@"No contour points to draw.");
     }
+
+    CGContextRestoreGState(context); // Restore state after transformations
 
     // Draw Text
     if (!impl->displayText.empty()) {
+        CGContextSaveGState(context); // Save state before drawing text
+    
+        // Calculate scaled position
+        CGFloat scaledX = impl->x * scale + offsetX;
+        CGFloat scaledY = impl->y * scale + offsetY;
+
         NSDictionary *attributes = @{
-            NSFontAttributeName : [NSFont systemFontOfSize:24],
-            NSForegroundColorAttributeName : [NSColor colorWithCalibratedRed:(impl->textColor.r / 255.0)
-                                                                        green:(impl->textColor.g / 255.0)
-                                                                         blue:(impl->textColor.b / 255.0)
-                                                                        alpha:1.0]
+            NSFontAttributeName : [NSFont systemFontOfSize:impl->fontSize * scale],
+            NSForegroundColorAttributeName : [NSColor redColor]
         };
-        NSPoint point = NSMakePoint(50, impl->frameHeight - 50);
+
+        NSPoint point = NSMakePoint(scaledX, bounds.size.height - scaledY - (impl->fontSize * scale));// Adjust y for coordinate system
         NSString *nsText = [NSString stringWithUTF8String:impl->displayText.c_str()];
         [nsText drawAtPoint:point withAttributes:attributes];
+
+        CGContextRestoreGState(context); // Restore state after drawing text
     }
 }
 
@@ -151,9 +195,9 @@ bool CameraWindow::Create() {
         }
 
         // Create the window
-        NSRect frame = NSMakeRect(100, 100, width, height);
+        NSRect contentRect = NSMakeRect(100, 100, width, height);
         NSUInteger styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable;
-        NSWindow *window = [[NSWindow alloc] initWithContentRect:frame
+        NSWindow *window = [[NSWindow alloc] initWithContentRect:contentRect
                                                        styleMask:styleMask
                                                          backing:NSBackingStoreBuffered
                                                            defer:NO];
@@ -165,7 +209,7 @@ bool CameraWindow::Create() {
         [window makeKeyAndOrderFront:nil];
 
         // Initialize the custom content view
-        CameraContentView *cv = [[CameraContentView alloc] initWithFrame:frame];
+        CameraContentView *cv = [[CameraContentView alloc] initWithFrame:contentRect];
         [window setContentView:cv];
         contentView = cv;
 
