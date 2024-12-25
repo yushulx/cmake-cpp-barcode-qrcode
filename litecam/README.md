@@ -11,6 +11,10 @@ LiteCam is a lightweight, cross-platform library for capturing RGB frames from c
 
   https://github.com/user-attachments/assets/98af2001-6935-4151-a1ed-c5afe224491c
 
+- macOS
+
+  https://github.com/user-attachments/assets/ea2a2350-cd6a-4835-acae-2b78308b3b8a
+
 
   
 ## Features
