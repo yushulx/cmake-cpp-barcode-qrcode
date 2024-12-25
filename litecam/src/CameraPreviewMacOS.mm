@@ -72,14 +72,15 @@ struct CameraContentViewImpl {
     impl->x = x;
     impl->y = y;
     impl->fontSize = fontSize;
+    impl->textColor = color;
     [self setNeedsDisplay:YES];
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
 
-    CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
     NSRect bounds = [self bounds];
+    CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
     if (impl->rgbData.empty() || impl->frameWidth == 0 || impl->frameHeight == 0) {
         return;
     }
@@ -95,7 +96,6 @@ struct CameraContentViewImpl {
     CGFloat offsetX = (bounds.size.width - (impl->frameWidth * scale)) / 2.0;
     CGFloat offsetY = (bounds.size.height - (impl->frameHeight * scale)) / 2.0;
 
-    
     CGContextSaveGState(context); // Save state before transformations
 
     // Apply scaling and translation
@@ -134,8 +134,8 @@ struct CameraContentViewImpl {
         CGContextStrokePath(context);
 
         CGContextRestoreGState(context); // Restore state after drawing contour
-    } else {
-        NSLog(@"No contour points to draw.");
+
+        impl->contourPoints.clear(); // Clear the points after drawing
     }
 
     CGContextRestoreGState(context); // Restore state after transformations
@@ -148,9 +148,11 @@ struct CameraContentViewImpl {
         CGFloat scaledX = impl->x * scale + offsetX;
         CGFloat scaledY = impl->y * scale + offsetY;
 
+        NSColor *color = [NSColor colorWithRed:impl->textColor.r / 255.0 green:impl->textColor.g / 255.0 blue:impl->textColor.b / 255.0 alpha:1.0];
+        // NSLog(@"Color: R:%f G:%f B:%f", impl->textColor.r, impl->textColor.g, impl->textColor.b);
         NSDictionary *attributes = @{
             NSFontAttributeName : [NSFont systemFontOfSize:impl->fontSize * scale],
-            NSForegroundColorAttributeName : [NSColor redColor]
+            NSForegroundColorAttributeName : color
         };
 
         NSPoint point = NSMakePoint(scaledX, bounds.size.height - scaledY - (impl->fontSize * scale));// Adjust y for coordinate system
@@ -158,6 +160,8 @@ struct CameraContentViewImpl {
         [nsText drawAtPoint:point withAttributes:attributes];
 
         CGContextRestoreGState(context); // Restore state after drawing text
+
+        impl->displayText.clear(); // Clear the text after drawing
     }
 }
 
@@ -268,7 +272,7 @@ void CameraWindow::DrawContour(const std::vector<std::pair<int, int>> &points) {
     }
 }
 
-void CameraWindow::DrawText(const std::string &text, int x, int y, int fontSize, const Color &color) {
+void CameraWindow::DrawText(const std::string &text, int x, int y, int fontSize, const CameraWindow::Color &color) {
     if (contentView) {
         [contentView updateText:text x:x y:y fontSize:fontSize color:color];
     }

@@ -10,6 +10,23 @@ if(WIN32)
     endif()
     
     set(DBR_LIBS "DynamsoftCorex64" "DynamsoftLicensex64" "DynamsoftCaptureVisionRouterx64" "DynamsoftUtilityx64")
+
+elseif(APPLE)
+    set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wl,-rpath,@executable_path")
+    set(CMAKE_INSTALL_RPATH "@executable_path")
+
+    link_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../dist/lib/macos
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../examples/10.x/sdk/platforms/macos
+    )
+
+    set(DBR_LIBS
+        "DynamsoftCore"
+        "DynamsoftLicense"
+        "DynamsoftCaptureVisionRouter"
+        "DynamsoftUtility"
+        "pthread"
+    )
 elseif(UNIX)
     SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wl,-rpath=$ORIGIN")
     SET(CMAKE_INSTALL_RPATH "$ORIGIN")
@@ -39,6 +56,12 @@ if(WIN32)
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../examples/10.x/sdk/platforms/win/bin/      
     $<TARGET_FILE_DIR:BarcodeScanner>)
+elseif(APPLE)
+    add_custom_command(TARGET BarcodeScanner POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../examples/10.x/sdk/platforms/macos
+        $<TARGET_FILE_DIR:BarcodeScanner>
+    )
 elseif(UNIX)
     add_custom_command(TARGET BarcodeScanner POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

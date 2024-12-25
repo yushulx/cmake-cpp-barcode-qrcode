@@ -83,6 +83,8 @@ int main()
                         {
                             const CBarcodeResultItem *barcodeResultItem = barcodeResult->GetItem(i);
                             CPoint *points = barcodeResultItem->GetLocation().points;
+                            int x = points[0][0];
+                            int y = points[0][1];
 
                             std::vector<std::pair<int, int>> corners = {
                                 {points[0][0], points[0][1]},
@@ -92,7 +94,7 @@ int main()
 
                             window.DrawContour(corners);
 
-                            window.DrawText(barcodeResultItem->GetText(), points[0][0], points[0][1], 24, textColor);
+                            window.DrawText(barcodeResultItem->GetText(), x, y, 24, textColor);
                         }
                     }
 
@@ -106,5 +108,7 @@ int main()
         camera.Release();
     }
 
+    delete cvr;
+    std::cout << "Done.\n";
     return 0;
 }
