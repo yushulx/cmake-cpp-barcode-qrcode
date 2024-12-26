@@ -183,6 +183,11 @@ CameraWindow::CameraWindow(int width, int height, const std::string &title)
     : width(width), height(height), title(title), nsWindow(nullptr), contentView(nullptr) {}
 
 CameraWindow::~CameraWindow() {
+    if (contentView) {
+        CameraContentView *cv = (__bridge CameraContentView *)contentView;
+        [cv removeFromSuperview];
+    }
+
     if (nsWindow) {
         NSWindow *window = (__bridge NSWindow *)nsWindow;
         [window close];
