@@ -1,77 +1,88 @@
 #include "Camera.h"
 #include <iostream>
 #import <AVFoundation/AVFoundation.h>
+#include <mutex>
+#include <condition_variable>
 
 @interface CaptureDelegate : NSObject <AVCaptureVideoDataOutputSampleBufferDelegate>
 {
     FrameData *frame;
-    dispatch_semaphore_t semaphore;
+    std::mutex *frameMutex;
+    std::condition_variable *frameCondition;
+    bool *frameReady;
 }
 
-- (instancetype)initWithFrame:(FrameData *)frame semaphore:(dispatch_semaphore_t)semaphore;
+- (instancetype)initWithFrame:(FrameData *)frame
+                    frameMutex:(std::mutex *)frameMutex
+               frameCondition:(std::condition_variable *)frameCondition
+                   frameReady:(bool *)frameReady;
 
 @end
 
 @implementation CaptureDelegate
 
-- (instancetype)initWithFrame:(FrameData *)frame semaphore:(dispatch_semaphore_t)semaphore {
+- (instancetype)initWithFrame:(FrameData *)frame
+                    frameMutex:(std::mutex *)frameMutex
+               frameCondition:(std::condition_variable *)frameCondition
+                   frameReady:(bool *)frameReady {
     self = [super init];
     if (self) {
         self->frame = frame;
-        self->semaphore = semaphore;
+        self->frameMutex = frameMutex;
+        self->frameCondition = frameCondition;
+        self->frameReady = frameReady;
     }
     return self;
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output
-didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
-       fromConnection:(AVCaptureConnection *)connection {
-    
+ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+        fromConnection:(AVCaptureConnection *)connection {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-
     if (!imageBuffer) {
         std::cerr << "Failed to get image buffer." << std::endl;
-        dispatch_semaphore_signal(semaphore);
         return;
     }
 
     CVPixelBufferLockBaseAddress(imageBuffer, kCVPixelBufferLock_ReadOnly);
-    void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
+
     size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
     size_t height = CVPixelBufferGetHeight(imageBuffer);
     size_t width = CVPixelBufferGetWidth(imageBuffer);
-    
-    frame->width = width;
-    frame->height = height;
-    frame->size = width * height * 3;
-    frame->rgbData = new unsigned char[frame->size];
+    void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
 
-    OSType pixelFormat = CVPixelBufferGetPixelFormatType(imageBuffer);
+    {
+        std::lock_guard<std::mutex> lock(*frameMutex);
 
-    // CFStringRef pixelFormatString = UTCreateStringForOSType(pixelFormat);
-    // NSLog(@"Pixel Format: %@", pixelFormatString);
-    // CFRelease(pixelFormatString);
+        frame->width = width;
+        frame->height = height;
+        frame->size = width * height * 3;
+        frame->rgbData = new unsigned char[frame->size];
 
-    if (pixelFormat == kCVPixelFormatType_32BGRA) {
-        // If already in BGRA format, copy the data
-        unsigned char *src = (unsigned char *)baseAddress;
-        unsigned char *dst = frame->rgbData;
+        OSType pixelFormat = CVPixelBufferGetPixelFormatType(imageBuffer);
+        if (pixelFormat == kCVPixelFormatType_32BGRA) {
+            unsigned char *src = (unsigned char *)baseAddress;
+            unsigned char *dst = frame->rgbData;
 
-        for (size_t y = 0; y < height; ++y) {
-            for (size_t x = 0; x < width; ++x) {
-                size_t offset = y * bytesPerRow + x * 4;
-                dst[0] = src[offset + 2]; // R
-                dst[1] = src[offset + 1]; // G
-                dst[2] = src[offset + 0]; // B
-                dst += 3;
+            for (size_t y = 0; y < height; ++y) {
+                for (size_t x = 0; x < width; ++x) {
+                    size_t offset = y * bytesPerRow + x * 4;
+                    dst[0] = src[offset + 2]; // R
+                    dst[1] = src[offset + 1]; // G
+                    dst[2] = src[offset + 0]; // B
+                    dst += 3;
+                }
             }
+        } else {
+            std::cerr << "Unsupported pixel format." << std::endl;
         }
-    } else {
-        std::cerr << "Unsupported pixel format." << std::endl;
+
+        *frameReady = true;
     }
 
+    frameCondition->notify_one();
+
     CVPixelBufferUnlockBaseAddress(imageBuffer, kCVPixelBufferLock_ReadOnly);
-    dispatch_semaphore_signal(semaphore);
 }
 
 
@@ -135,45 +146,42 @@ bool Camera::Open(int cameraIndex)
     }
 }
 
-void Camera::Release()
-{
-    if (captureSession)
-    {
+void Camera::Release() {
+    if (captureSession) {
         AVCaptureSession *session = (__bridge AVCaptureSession *)captureSession;
-        
-        if (videoOutput)
-        {
-            AVCaptureVideoDataOutput *output = (__bridge AVCaptureVideoDataOutput *)videoOutput;
-            [session removeOutput:output];
-            videoOutput = nil;
-        }
-
         [session stopRunning];
-        captureSession = nil;
+        captureSession = nullptr;
+    }
+
+    if (videoOutput) {
+        videoOutput = nullptr;
     }
 }
 
-FrameData Camera::CaptureFrame()
-{
-    @autoreleasepool {
-        FrameData frame = {};
+FrameData Camera::CaptureFrame() {
+    static FrameData frame;
+    static std::mutex frameMutex;
+    static std::condition_variable frameCondition;
+    static bool frameReady = false;
 
+    @autoreleasepool {
         if (!captureSession || !videoOutput) {
             std::cerr << "Capture session is not initialized." << std::endl;
             return frame;
         }
 
         AVCaptureSession *session = (__bridge AVCaptureSession *)captureSession;
-        AVCaptureVideoDataOutput *vo = (__bridge AVCaptureVideoDataOutput *)videoOutput;
- 
-        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        AVCaptureVideoDataOutput *output = (__bridge AVCaptureVideoDataOutput *)videoOutput;
 
-        [vo setSampleBufferDelegate:[[CaptureDelegate alloc] initWithFrame:&frame semaphore:semaphore]
-                                       queue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)];
+        CaptureDelegate *delegate = [[CaptureDelegate alloc] initWithFrame:&frame
+                                                                frameMutex:&frameMutex
+                                                           frameCondition:&frameCondition
+                                                               frameReady:&frameReady];
+        [output setSampleBufferDelegate:delegate queue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)];
 
-        // Wait for the delegate to process the frame
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-
+        std::unique_lock<std::mutex> lock(frameMutex);
+        frameCondition.wait(lock, [&]() { return frameReady; });
+        frameReady = false;
         frameWidth = frame.width;
         frameHeight = frame.height;
         return frame;
