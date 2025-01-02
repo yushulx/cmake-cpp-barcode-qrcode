@@ -131,3 +131,4 @@ int main()
 ## Blog
 - [Building a Lightweight C++ Camera Library for Barcode Scanning on Linux](https://www.dynamsoft.com/codepool/linux-cpp-camera-barcode-scanner.html)
 - [How to Implement Camera Preview with Windows Media Foundation API in C++](https://www.dynamsoft.com/codepool/windows-cpp-camera-barcode-scanner.html)
+- [Mixing Objective-C and C++ in macOS to Build a Camera-Based Barcode Scanner](https://www.dynamsoft.com/codepool/macos-cpp-camera-barcode-scanner.html)
