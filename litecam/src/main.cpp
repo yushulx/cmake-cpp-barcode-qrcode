@@ -40,7 +40,8 @@ void PrintDevices(const std::vector<CaptureDeviceInfo> &devices)
 
 #ifdef _WIN32
         char buffer[512]; // Buffer for converted string
-        wcstombs(buffer, devices[i].friendlyName, sizeof(buffer));
+        // wcstombs(buffer, devices[i].friendlyName, sizeof(buffer));
+        wcstombs_s(nullptr, buffer, devices[i].friendlyName, sizeof(buffer));
         printf("[%zu]: %s\n", i, buffer);
 #else
         printf("[%zu]: %s\n", i, devices[i].friendlyName);

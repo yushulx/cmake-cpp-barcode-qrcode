@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <cstring>
 
 bool Camera::Open(int cameraIndex)
 {
@@ -196,48 +197,6 @@ void Camera::StopCapture()
     ioctl(fd, VIDIOC_STREAMOFF, &type);
 }
 
-CAMERA_API std::vector<CaptureDeviceInfo> ListCaptureDevices()
-{
-    std::vector<CaptureDeviceInfo> devices;
-
-    // Scan for /dev/videoX devices
-    for (int i = 0; i < 10; ++i) // Check first 10 devices (can be increased if needed)
-    {
-        std::string devicePath = "/dev/video" + std::to_string(i);
-
-        // Open the device
-        int fd = open(devicePath.c_str(), O_RDWR | O_NONBLOCK, 0);
-        if (fd == -1)
-        {
-            continue; // Skip if the device cannot be opened
-        }
-
-        // Query device capabilities
-        struct v4l2_capability cap;
-        if (ioctl(fd, VIDIOC_QUERYCAP, &cap) == 0)
-        {
-            // Check if it's a video capture device
-            if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)
-            {
-                CaptureDeviceInfo deviceInfo = {};
-
-                // Copy the friendly name directly into the `friendlyName` buffer
-                strncpy(deviceInfo.friendlyName, reinterpret_cast<const char *>(cap.card), sizeof(deviceInfo.friendlyName) - 1);
-
-                // Null-terminate the friendlyName string
-                deviceInfo.friendlyName[sizeof(deviceInfo.friendlyName) - 1] = '\0';
-
-                devices.push_back(deviceInfo);
-            }
-        }
-
-        // Close the device
-        close(fd);
-    }
-
-    return devices;
-}
-
 std::vector<MediaTypeInfo> Camera::ListSupportedMediaTypes()
 {
     std::vector<MediaTypeInfo> mediaTypes;
@@ -297,3 +256,74 @@ std::vector<MediaTypeInfo> Camera::ListSupportedMediaTypes()
 
     return mediaTypes;
 }
+
+std::vector<CaptureDeviceInfo> ListCaptureDevices()
+{
+    std::vector<CaptureDeviceInfo> devices;
+
+    // Scan for /dev/videoX devices
+    for (int i = 0; i < 10; ++i) // Check first 10 devices (can be increased if needed)
+    {
+        std::string devicePath = "/dev/video" + std::to_string(i);
+
+        // Open the device
+        int fd = open(devicePath.c_str(), O_RDWR | O_NONBLOCK, 0);
+        if (fd == -1)
+        {
+            continue; // Skip if the device cannot be opened
+        }
+
+        // Query device capabilities
+        struct v4l2_capability cap;
+        if (ioctl(fd, VIDIOC_QUERYCAP, &cap) == 0)
+        {
+            // Check if it's a video capture device
+            if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)
+            {
+                CaptureDeviceInfo deviceInfo = {};
+
+                // Copy the friendly name directly into the `friendlyName` buffer
+                strncpy(deviceInfo.friendlyName, reinterpret_cast<const char *>(cap.card), sizeof(deviceInfo.friendlyName) - 1);
+
+                // Null-terminate the friendlyName string
+                deviceInfo.friendlyName[sizeof(deviceInfo.friendlyName) - 1] = '\0';
+
+                devices.push_back(deviceInfo);
+            }
+        }
+
+        // Close the device
+        close(fd);
+    }
+
+    return devices;
+}
+
+void ReleaseFrame(FrameData &frame)
+{
+    if (frame.rgbData)
+    {
+        delete[] frame.rgbData;
+        frame.rgbData = nullptr;
+        frame.size = 0;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Save a frame as a JPEG image using the STB library
+// https://github.com/nothings/stb/blob/master/stb_image_write.h
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+void saveFrameAsJPEG(const unsigned char *data, int width, int height, const std::string &filename)
+{
+    // Simple image saving using STB library or another JPEG encoding method
+    if (stbi_write_jpg(filename.c_str(), width, height, 3, data, 90))
+    {
+        std::cout << "Saved frame to " << filename << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error saving frame as JPEG." << std::endl;
+    }
+}
+///////////////////////////////////////////////////////////////////////////////

@@ -1,9 +1,12 @@
 #include "CameraPreview.h"
 #include <iostream>
 
-CameraWindow::CameraWindow(int w, int h, const std::string &t)
-    : width(w), height(h), title(t), hwnd(nullptr), hdc(nullptr)
+CameraWindow::CameraWindow(int w, int h, const char *title)
+    : width(w), height(h), hwnd(nullptr), hdc(nullptr)
 {
+
+    this->title = new char[strlen(title) + 1];
+    strcpy_s(this->title, strlen(title) + 1, title);
 
     hInstance = GetModuleHandle(nullptr);
 
@@ -16,6 +19,8 @@ CameraWindow::CameraWindow(int w, int h, const std::string &t)
 
 CameraWindow::~CameraWindow()
 {
+    delete[] title;
+
     if (hdc)
     {
         ReleaseDC(hwnd, hdc);
@@ -89,7 +94,7 @@ bool CameraWindow::Create()
 
     // Create the window
     hwnd = CreateWindowEx(
-        0, "CameraWindowClass", title.c_str(), WS_OVERLAPPEDWINDOW,
+        0, "CameraWindowClass", title, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, width, height,
         nullptr, nullptr, hInstance, nullptr);
 

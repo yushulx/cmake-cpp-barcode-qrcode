@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 
 # Project name and version
 project(CameraProject VERSION 1.0 LANGUAGES CXX)
@@ -12,6 +12,8 @@ set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 
 # Define source files for the Camera library
 if (WIN32)
+    #set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL") 
+
     set(LIBRARY_SOURCES
         src/CameraWindows.cpp
         src/CameraPreviewWindows.cpp

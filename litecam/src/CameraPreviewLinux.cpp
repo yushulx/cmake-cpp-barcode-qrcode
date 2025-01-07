@@ -1,14 +1,19 @@
 #include "CameraPreview.h"
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 
-CameraWindow::CameraWindow(int w, int h, const std::string &t)
-    : width(w), height(h), title(t), display(nullptr), window(0), gc(nullptr)
+CameraWindow::CameraWindow(int w, int h, const char *title)
+    : width(w), height(h), display(nullptr), window(0), gc(nullptr)
 {
+    this->title = new char[strlen(title) + 1];
+    strcpy(this->title, title);
 }
 
 CameraWindow::~CameraWindow()
 {
+    delete[] title;
+
     if (gc)
     {
         XFreeGC(display, gc);
@@ -47,7 +52,7 @@ bool CameraWindow::Create()
         return false;
     }
 
-    XStoreName(display, window, title.c_str());
+    XStoreName(display, window, title);
 
     gc = XCreateGC(display, window, 0, nullptr);
     if (!gc)

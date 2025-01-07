@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <cstring>
 
 // Define a C++ implementation struct to hold drawing data
 struct CameraContentViewImpl {
@@ -179,10 +180,16 @@ struct CameraContentViewImpl {
 @end
 
 // Implementation of CameraWindow class
-CameraWindow::CameraWindow(int width, int height, const std::string &title)
-    : width(width), height(height), title(title), nsWindow(nullptr), contentView(nullptr) {}
+CameraWindow::CameraWindow(int width, int height, const char *title)
+    : width(width), height(height), nsWindow(nullptr), contentView(nullptr) {
+
+        this->title = new char[strlen(title) + 1];
+        strcpy(this->title, title);
+    }
 
 CameraWindow::~CameraWindow() {
+    delete[] title;
+    
     if (contentView) {
         CameraContentView *cv = (__bridge CameraContentView *)contentView;
         [cv removeFromSuperview];
@@ -214,7 +221,7 @@ bool CameraWindow::Create() {
             return false;
         }
 
-        [window setTitle:[NSString stringWithUTF8String:title.c_str()]];
+        [window setTitle:[NSString stringWithUTF8String:title]];
         [window makeKeyAndOrderFront:nil];
 
         // Initialize the custom content view
