@@ -12,7 +12,7 @@ set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 
 # Define source files for the Camera library
 if (WIN32)
-    #set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL") 
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded") 
 
     set(LIBRARY_SOURCES
         src/CameraWindows.cpp
