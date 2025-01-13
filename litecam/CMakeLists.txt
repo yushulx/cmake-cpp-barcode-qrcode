@@ -13,7 +13,6 @@ set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 # Define source files for the Camera library
 if (WIN32)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug")
     else()
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded") 
