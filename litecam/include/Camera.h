@@ -86,7 +86,7 @@ public:
     Camera();
     ~Camera();
 #elif __linux__
-    Camera() : fd(-1), frameWidth(640), frameHeight(480), buffers(nullptr), bufferCount(0) {}
+    Camera() : frameWidth(640), frameHeight(480), fd(-1), buffers(nullptr), bufferCount(0) {}
     ~Camera() { Release(); }
 #elif __APPLE__
     Camera() noexcept; // Add noexcept to match the implementation
